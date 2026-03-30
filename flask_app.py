@@ -388,4 +388,4 @@ load_data()
 
 if __name__ == '__main__':
     # Run on port 8000
-    app.run(debug=False, port=8000)
+    app.run(debug=True, port=8000)
