@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLBB Pro Analyst</title>
+    <title>Beartic</title>
     <style>
         :root {
             --bg-dark: #0f172a;
@@ -28,7 +28,6 @@
             overflow-x: hidden;
         }
 
-        /* Interactive Canvas Background */
         #bg-canvas {
             position: fixed;
             top: 0;
@@ -39,7 +38,6 @@
             pointer-events: none;
         }
 
-        /* Header & Nav */
         header {
             background: var(--bg-card);
             padding: 1rem 2rem;
@@ -52,10 +50,7 @@
             backdrop-filter: blur(12px);
         }
         
-        .brand-container {
-            display: flex;
-            flex-direction: column;
-        }
+        .brand-container { display: flex; flex-direction: column; }
 
         h1 { 
             font-size: 1.25rem; 
@@ -66,11 +61,7 @@
             margin-bottom: 2px;
         }
         .logo-icon { width: 24px; height: 24px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-red)); border-radius: 6px; }
-        .creator-text {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            padding-left: 34px;
-        }
+        .creator-text { font-size: 0.75rem; color: var(--text-muted); padding-left: 34px; }
         
         nav { display: flex; gap: 1rem; }
         button.tab-btn {
@@ -88,7 +79,6 @@
 
         main { flex: 1; padding: 2rem; max-width: 1400px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; position: relative; z-index: 5; }
 
-        /* Sections */
         .section { display: none; animation: fadeIn 0.3s ease; flex: 1; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -96,7 +86,7 @@
         /* --- ANALYZER STYLES --- */
         .analyzer-grid {
             display: grid;
-            grid-template-columns: 1fr 350px 1fr;
+            grid-template-columns: 1fr 400px 1fr;
             gap: 2rem;
             align-items: start;
         }
@@ -108,6 +98,8 @@
             padding: 1.5rem;
             border: 1px solid var(--border);
             min-height: 500px;
+            display: flex;
+            flex-direction: column;
         }
 
         .team-header {
@@ -122,7 +114,7 @@
         .blue-text { color: var(--accent-blue); }
         .red-text { color: var(--accent-red); }
 
-        .hero-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .hero-list { display: flex; flex-direction: column; gap: 0.75rem; flex: 1; }
         
         .hero-card {
             display: flex;
@@ -132,8 +124,6 @@
             border-radius: 8px;
             cursor: pointer;
             transition: transform 0.2s;
-            position: relative;
-            backdrop-filter: blur(5px);
             border: 1px solid transparent;
         }
         .hero-card:hover { transform: translateX(5px); border-color: rgba(255,255,255,0.2); }
@@ -171,6 +161,7 @@
             backdrop-filter: blur(5px);
         }
         .add-hero-btn:hover { border-color: var(--text-main); color: var(--text-main); background: rgba(255,255,255,0.05); }
+        .hidden { display: none !important; }
 
         .analysis-panel {
             display: flex;
@@ -180,61 +171,7 @@
             top: 2rem;
         }
 
-        .chart-container {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            padding: 1rem;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            display: flex;
-            justify-content: center;
-            /* Flex layout to center the SVG */
-        }
-        
-        .stat-box {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            text-align: center;
-        }
-        
-        /* Win Rate Bar Styles */
-        .winrate-container {
-            display: none;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .prob-display-text {
-            display: flex;
-            justify-content: space-between;
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .progress-bar-track {
-            width: 100%;
-            height: 24px;
-            background-color: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
-        }
-
-        .progress-gradient {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-blue) 50%, var(--accent-red) 50%);
-            transition: background 0.5s ease;
-        }
-
-        .advantage-list { text-align: left; margin-top: 1rem; font-size: 0.9rem; }
-        .advantage-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
+        /* --- Suggestion Box (Spacing Updated) --- */
         .suggestion-box {
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid var(--accent-green);
@@ -242,8 +179,124 @@
             padding: 1rem;
             border-radius: 8px;
             font-size: 0.9rem;
-            display: none;
+            display: none; /* Hidden by default */
+            margin-top: 1.5rem; /* Added space between draft and suggestion */
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        
+        .suggestion-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        /* --- Circular Progress Charts --- */
+        .circles-container {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .circle-wrapper {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+
+        .circle-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .circle-bg {
+            fill: none;
+            stroke: rgba(255,255,255,0.05);
+            stroke-width: 8;
+        }
+
+        .circle-progress {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .circle-blue { stroke: var(--accent-blue); }
+        .circle-red { stroke: var(--accent-red); }
+
+        .circle-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        
+        .circle-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 2px;
+        }
+        
+        .circle-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .vs-text {
+            font-size: 1.5rem;
+            font-weight: 900;
+            font-style: italic;
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        /* --- Comparison Table --- */
+        .stats-table-box {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .comparison-table th {
+            text-align: center;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .comparison-table th.stat-name { text-align: left; }
+        
+        .comparison-table td {
+            padding: 0.6rem 0.4rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            text-align: center;
+        }
+        .comparison-table tr:last-child td { border-bottom: none; }
+        
+        .diff-positive { color: var(--accent-blue); font-weight: 700; }
+        .diff-negative { color: var(--accent-red); font-weight: 700; }
 
         .btn-reset {
             width: 100%;
@@ -256,12 +309,9 @@
             font-weight: 600;
             transition: all 0.2s;
         }
-        .btn-reset:hover {
-            background: var(--accent-red);
-            color: white;
-        }
+        .btn-reset:hover { background: var(--accent-red); color: white; }
 
-        /* --- STATS TABLE STYLES --- */
+        /* --- STATS TABLE STYLES (Hero Stats Tab) --- */
         .filters {
             display: flex;
             gap: 1rem;
@@ -304,137 +354,73 @@
         .win-rate-high { color: var(--accent-green); font-weight: bold; }
         .win-rate-low { color: var(--accent-red); font-weight: bold; }
 
-        .stat-hero-cell {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-        }
-        .stat-hero-img {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--border);
-        }
-        .phase-cell {
-            text-align: center;
-            font-family: monospace;
-            font-size: 0.9rem;
-        }
+        .stat-hero-cell { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+        .stat-hero-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
+        .phase-cell { text-align: center; font-family: monospace; font-size: 0.9rem; }
 
         /* --- MATCH VIEWER STYLES --- */
         .match-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
         
         .match-card {
-            background: var(--bg-card); 
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            border-radius: 8px; 
-            overflow: hidden; 
-            transition: transform 0.2s, border-color 0.2s;
-            cursor: pointer;
-            position: relative;
+            background: var(--bg-card); backdrop-filter: blur(10px); border: 1px solid var(--border);
+            border-radius: 8px; overflow: hidden; transition: transform 0.2s, border-color 0.2s;
+            cursor: pointer; position: relative;
         }
 
-        .match-card:hover { 
-            transform: translateY(-3px); 
-            border-color: var(--text-muted); 
-        }
+        .match-card:hover { transform: translateY(-3px); border-color: var(--text-muted); }
 
         .match-header {
-            padding: 0.75rem 1rem; 
-            background: rgba(0,0,0,0.2);
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            font-size: 0.85rem; 
-            color: var(--text-muted);
+            padding: 0.75rem 1rem; background: rgba(0,0,0,0.2);
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.85rem; color: var(--text-muted);
         }
 
-        .chevron {
-            transition: transform 0.3s ease;
-            font-size: 1.2rem;
+        .chevron { transition: transform 0.3s ease; font-size: 1.2rem; }
+        .match-card.active .chevron { transform: rotate(180deg); }
+
+        .btn-import {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
         }
-        .match-card.active .chevron {
-            transform: rotate(180deg);
+        .btn-import:hover {
+            background: var(--accent-green);
+            color: white;
         }
 
         .match-body { padding: 1rem; }
         
-        .team-score { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 0.8rem; 
-            font-weight: 700; 
-        }
+        .team-score { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; font-weight: 700; }
         .winner { color: var(--accent-green); }
         .loser { color: var(--text-muted); opacity: 0.7; }
 
-        .phase-label {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-            letter-spacing: 0.05em;
-        }
+        .phase-label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; letter-spacing: 0.05em; }
 
-        .draft-preview { 
-            display: flex; 
-            gap: 4px; 
-            margin-top: 0.5rem; 
-            justify-content: space-between;
-        }
+        .draft-preview { display: flex; gap: 4px; margin-top: 0.5rem; justify-content: space-between; }
         
         .mini-icon {
-            width: 32px; 
-            height: 32px; 
-            background: var(--bg-input);
-            border-radius: 6px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            font-size: 0.6rem; 
-            overflow: hidden;
-            border: 1px solid transparent;
-            transition: border-color 0.2s;
-            box-sizing: border-box;
+            width: 32px; height: 32px; background: var(--bg-input); border-radius: 6px;
+            display: flex; align-items: center; justify-content: center; font-size: 0.6rem;
+            overflow: hidden; border: 1px solid transparent; transition: border-color 0.2s; box-sizing: border-box;
         }
-        .match-card:hover .mini-icon {
-            border-color: var(--border);
-        }
-        .mini-icon img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-        }
+        .match-card:hover .mini-icon { border-color: var(--border); }
+        .mini-icon img { width: 100%; height: 100%; object-fit: cover; }
 
         .mini-icon.ban-blue { border: 2px solid var(--accent-blue); }
         .mini-icon.ban-red { border: 2px solid var(--accent-red); }
 
-        .match-bans {
-            display: none;
-            background: rgba(0,0,0,0.15);
-            padding: 1rem;
-            border-top: 1px solid var(--border);
-        }
-        .match-bans.open {
-            display: block;
-            animation: slideDown 0.3s ease-out;
-        }
+        .match-bans { display: none; background: rgba(0,0,0,0.15); padding: 1rem; border-top: 1px solid var(--border); }
+        .match-bans.open { display: block; animation: slideDown 0.3s ease-out; }
 
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .ban-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.8rem;
-        }
+        .ban-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
         .ban-row:last-child { margin-bottom: 0; }
 
         /* Modal */
@@ -446,8 +432,7 @@
         }
         .modal {
             background: var(--bg-card); backdrop-filter: blur(12px); width: 90%; max-width: 600px; max-height: 80vh;
-            border-radius: 12px; border: 1px solid var(--border);
-            display: flex; flex-direction: column;
+            border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column;
         }
         .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .modal-search {
@@ -464,6 +449,7 @@
             transition: all 0.2s;
         }
         .grid-item:hover { border-color: var(--accent-blue); background: var(--bg-card); }
+        .grid-item.picked { opacity: 0.3; pointer-events: none; background: #334155; border-style: dashed; }
         .grid-item img { width: 40px; height: 40px; border-radius: 4px; margin-bottom: 4px; object-fit: cover; }
         .grid-item span { display: block; font-size: 0.7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -479,14 +465,14 @@
     <div class="brand-container">
         <h1>
             <div class="logo-icon"></div>
-            MLBB Pro Analyst
+            <i>Beartic's Statistics</i>
         </h1>
-        <p class="creator-text">Created by Imanuel Rava</p>
+        <p class="creator-text">Suam habet fortuna rationem.</p>
     </div>
     <nav>
-        <button class="tab-btn active" data-tab="analyzer" onclick="switchTab('analyzer')">Comp Analyzer</button>
-        <button class="tab-btn" data-tab="stats" onclick="switchTab('stats')">Hero Statistics</button>
-        <button class="tab-btn" data-tab="database" onclick="switchTab('database')">Tournament Data</button>
+        <button class="tab-btn active" data-tab="analyzer" onclick="switchTab('analyzer')">Draft Analyzer</button>
+        <button class="tab-btn" data-tab="stats" onclick="switchTab('stats')">Tournament Statistics</button>
+        <button class="tab-btn" data-tab="database" onclick="switchTab('database')">Tournament Results</button>
     </nav>
 </header>
 
@@ -501,31 +487,63 @@
                     <span id="blue-count">0/5</span>
                 </div>
                 <div id="blue-list" class="hero-list"></div>
-                <button class="add-hero-btn" onclick="openModal('blue')">+ Add Hero</button>
+                <button id="add-blue-btn" class="add-hero-btn" onclick="openModal('blue')">+ Add Hero</button>
+                
+                <!-- Suggestion Box (Blue) -->
+                <div id="blue-suggestion" class="suggestion-box">
+                    <span class="suggestion-title">Analyst Suggestion</span>
+                    <span id="blue-suggestion-text"></span>
+                </div>
             </div>
 
-            <!-- Analysis -->
+            <!-- Analysis Panel (Center) -->
             <div class="analysis-panel">
                 <button class="btn-reset" onclick="resetDraft()">↺ Reset Draft</button>
 
-                <div class="chart-container" id="radar-chart"></div>
-                
-                <div class="stat-box">
-                    <!-- New Winrate Container -->
-                    <div id="winrate-container" class="winrate-container">
-                        <div class="prob-display-text">
-                            <span class="blue-text" id="blue-prob-text">0.00%</span>
-                            <span class="red-text" id="red-prob-text">0.00%</span>
-                        </div>
-                        <div class="progress-bar-track">
-                            <div class="progress-gradient" id="bar-gradient"></div>
+                <!-- Circular Win Probability -->
+                <div class="circles-container">
+                    <!-- Blue Circle -->
+                    <div class="circle-wrapper">
+                        <svg class="circle-svg" viewBox="0 0 100 100">
+                            <circle class="circle-bg" cx="50" cy="50" r="40"></circle>
+                            <circle id="circle-prog-blue" class="circle-progress circle-blue" cx="50" cy="50" r="40"></circle>
+                        </svg>
+                        <div class="circle-text">
+                            <span class="circle-label">Blue</span>
+                            <span class="circle-value blue-text" id="circle-val-blue">50.00%</span>
                         </div>
                     </div>
 
-                    <div id="advantages" class="advantage-list"></div>
+                    <div class="vs-text">VS</div>
+
+                    <!-- Red Circle -->
+                    <div class="circle-wrapper">
+                        <svg class="circle-svg" viewBox="0 0 100 100">
+                            <circle class="circle-bg" cx="50" cy="50" r="40"></circle>
+                            <circle id="circle-prog-red" class="circle-progress circle-red" cx="50" cy="50" r="40"></circle>
+                        </svg>
+                        <div class="circle-text">
+                            <span class="circle-label">Red</span>
+                            <span class="circle-value red-text" id="circle-val-red">50.00%</span>
+                        </div>
+                    </div>
                 </div>
-                <div id="suggestion" class="suggestion-box">
-                    <strong>Suggestion:</strong> <span id="suggestion-text"></span>
+
+                <!-- Stats Comparison Table -->
+                <div class="stats-table-box">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th class="stat-name">Stat</th>
+                                <th>Blue</th>
+                                <th>Red</th>
+                                <th>Diff</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparison-tbody">
+                            <tr><td colspan="4" style="text-align:center; color:var(--text-muted)">Select heroes to see stats</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -536,7 +554,13 @@
                     <span id="red-count">0/5</span>
                 </div>
                 <div id="red-list" class="hero-list"></div>
-                <button class="add-hero-btn" onclick="openModal('red')">+ Add Hero</button>
+                <button id="add-red-btn" class="add-hero-btn" onclick="openModal('red')">+ Add Hero</button>
+                
+                <!-- Suggestion Box (Red) -->
+                <div id="red-suggestion" class="suggestion-box">
+                    <span class="suggestion-title">Analyst Suggestion</span>
+                    <span id="red-suggestion-text"></span>
+                </div>
             </div>
         </div>
     </section>
@@ -624,6 +648,8 @@
 </div>
 
 <script>
+    const API_BASE = 'http://localhost:8000/api';
+
     let state = {
         heroData: {},      
         matches: [],       
@@ -634,13 +660,11 @@
         isApiConnected: false
     };
 
-    const API_BASE = 'http://localhost:8000/api';
-
     window.addEventListener('DOMContentLoaded', async () => {
         await checkConnection();
         if (state.isApiConnected) {
             await Promise.all([loadHeroData(), loadMatches(), loadFilters()]);
-            renderChart(); 
+            renderTeams(); 
         }
     });
 
@@ -714,6 +738,108 @@
         } catch (e) {
             tbody.innerHTML = '<tr><td colspan="7" class="error">Error loading stats</td></tr>';
         }
+    }
+
+    // --- ANALYSIS LOGIC ---
+
+    async function fetchAnalysis() {
+        const tbody = document.getElementById('comparison-tbody');
+        
+        // Reset UI if empty
+        if (state.blueTeam.length === 0 && state.redTeam.length === 0) {
+            document.getElementById('circle-val-blue').innerText = '50.00%';
+            document.getElementById('circle-val-red').innerText = '50.00%';
+            document.getElementById('circle-prog-blue').style.strokeDashoffset = 157; 
+            document.getElementById('circle-prog-red').style.strokeDashoffset = 157;
+            
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted)">Select heroes to see stats</td></tr>';
+            hideSuggestions();
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/analyze`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    blue_team: state.blueTeam,
+                    red_team: state.redTeam
+                })
+            });
+            
+            const data = await res.json();
+            
+            // 1. Update Circles
+            const circumference = 2 * Math.PI * 40; 
+            
+            // Blue
+            const bluePerc = data.blue_prob;
+            const blueOffset = circumference - (bluePerc / 100) * circumference;
+            document.getElementById('circle-prog-blue').style.strokeDasharray = `${circumference} ${circumference}`;
+            document.getElementById('circle-prog-blue').style.strokeDashoffset = blueOffset;
+            document.getElementById('circle-val-blue').innerText = bluePerc.toFixed(2) + '%';
+
+            // Red
+            const redPerc = data.red_prob;
+            const redOffset = circumference - (redPerc / 100) * circumference;
+            document.getElementById('circle-prog-red').style.strokeDasharray = `${circumference} ${circumference}`;
+            document.getElementById('circle-prog-red').style.strokeDashoffset = redOffset;
+            document.getElementById('circle-val-red').innerText = redPerc.toFixed(2) + '%';
+
+            // 2. Update Stats Table
+            tbody.innerHTML = '';
+            
+            if (data.stats_table && data.stats_table.length > 0) {
+                data.stats_table.forEach(row => {
+                    const diffClass = row.leader === 'blue' ? 'diff-positive' : (row.leader === 'red' ? 'diff-negative' : '');
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="stat-name">${row.stat}</td>
+                        <td>${row.blue_val}</td>
+                        <td>${row.red_val}</td>
+                        <td class="${diffClass}">${row.diff}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // 3. Handle Suggestions
+            hideSuggestions();
+            
+            if (data.suggestion) {
+                const team = data.suggestion.team;
+                const sideId = team === 'Blue' ? 'blue-suggestion' : 'red-suggestion';
+                const textId = team === 'Blue' ? 'blue-suggestion-text' : 'red-suggestion-text';
+                
+                const box = document.getElementById(sideId);
+                const text = document.getElementById(textId);
+                
+                box.style.display = 'block';
+                text.innerText = data.suggestion.reason;
+            }
+
+        } catch (e) {
+            console.error(e);
+            tbody.innerHTML = '<tr><td colspan="4" class="error">Analysis failed</td></tr>';
+        }
+    }
+
+    function hideSuggestions() {
+        document.getElementById('blue-suggestion').style.display = 'none';
+        document.getElementById('red-suggestion').style.display = 'none';
+    }
+
+    // --- TOURNAMENT IMPORT FEATURE ---
+    
+    function importDraft(match) {
+        const safe = (arr) => arr || [];
+        state.blueTeam = [...safe(match.blue_picks_p1), ...safe(match.blue_picks_p2)];
+        state.redTeam = [...safe(match.red_picks_p1), ...safe(match.red_picks_p2)];
+
+        switchTab('analyzer');
+        renderTeams();
+        fetchAnalysis();
     }
 
     // --- RENDERING LOGIC ---
@@ -810,11 +936,6 @@
         return `<div class="mini-icon ${className}" title="${hero}"><img src="${path}" onerror="this.style.display='none'; this.parentElement.innerText='${hero.charAt(0)}'"></div>`;
     };
 
-    const renderIcons = (heroes) => {
-        if (!heroes || heroes.length === 0) return '';
-        return heroes.map(p => renderIcon(p)).join('');
-    };
-
     function toggleMatchBans(card) {
         card.classList.toggle('active');
         const bansDiv = card.querySelector('.match-bans');
@@ -845,8 +966,14 @@
         filtered.forEach(m => {
             const card = document.createElement('div');
             card.className = 'match-card';
+            
             card.onclick = (e) => {
-                toggleMatchBans(card);
+                if (e.target.closest('.btn-import')) {
+                    e.stopPropagation(); 
+                    importDraft(m);
+                } else {
+                    toggleMatchBans(card);
+                }
             };
 
             const blueClass = m.blue_result === 'WIN' ? 'winner' : 'loser';
@@ -861,21 +988,24 @@
             card.innerHTML = `
                 <div class="match-header">
                     <span>${m.tournament} • ${m.map}</span>
-                    <span class="chevron">▼</span>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button class="btn-import">Import Draft</button>
+                        <span class="chevron">▼</span>
+                    </div>
                 </div>
                 <div class="match-body">
                     <div class="team-score ${blueClass}">
                         <span>${m.blue_team}</span><span>${m.blue_result}</span>
                     </div>
                     <div class="draft-preview">
-                        ${renderIcons(bluePicks)}
+                        ${bluePicks.map(p => renderIcon(p)).join('')}
                     </div>
                     <div style="height:1px; background:rgba(255,255,255,0.1); margin: 0.8rem 0;"></div>
                     <div class="team-score ${redClass}">
                         <span>${m.red_team}</span><span>${m.red_result}</span>
                     </div>
                     <div class="draft-preview">
-                        ${renderIcons(redPicks)}
+                        ${redPicks.map(p => renderIcon(p)).join('')}
                     </div>
                 </div>
                 
@@ -895,7 +1025,7 @@
         });
     }
 
-    // --- COMP ANALYZER LOGIC ---
+    // --- Draft Analyzer LOGIC ---
 
     function initHeroGrid() {
         const grid = document.getElementById('hero-grid');
@@ -923,6 +1053,7 @@
         document.getElementById('hero-modal').style.display = 'flex';
         document.getElementById('hero-search').value = '';
         filterHeroes();
+        updatePickedHeroesUI();
     }
 
     function closeModal() {
@@ -938,9 +1069,20 @@
         });
     }
 
+    function updatePickedHeroesUI() {
+        const items = document.querySelectorAll('.grid-item');
+        items.forEach(item => {
+            const name = item.dataset.name;
+            if (state.blueTeam.includes(name) || state.redTeam.includes(name)) {
+                item.classList.add('picked');
+            } else {
+                item.classList.remove('picked');
+            }
+        });
+    }
+
     function selectHero(heroName) {
         if (state.blueTeam.includes(heroName) || state.redTeam.includes(heroName)) {
-            alert(`Hero ${heroName} has already been picked!`);
             return;
         }
 
@@ -951,16 +1093,14 @@
         }
         closeModal();
         renderTeams();
-        renderChart();
-        calculateAnalysis();
+        fetchAnalysis(); 
     }
 
     function removeHero(side, index) {
         if (side === 'blue') state.blueTeam.splice(index, 1);
         else state.redTeam.splice(index, 1);
         renderTeams();
-        renderChart();
-        calculateAnalysis();
+        fetchAnalysis(); 
     }
 
     function renderTeams() {
@@ -985,7 +1125,15 @@
                 `;
                 container.appendChild(card);
             });
+            
             document.getElementById(`${side}-count`).innerText = `${team.length}/5`;
+            
+            const addBtn = document.getElementById(`add-${side}-btn`);
+            if (team.length >= 5) {
+                addBtn.classList.add('hidden');
+            } else {
+                addBtn.classList.remove('hidden');
+            }
         };
 
         renderList(state.blueTeam, 'blue');
@@ -996,167 +1144,7 @@
         state.blueTeam = [];
         state.redTeam = [];
         renderTeams();
-        renderChart();
-        calculateAnalysis();
-    }
-
-    // --- MATH & CHART ---
-
-    function calculateStats(teamList) {
-        const categories = ['Durability', 'Offense', 'Crowd Control', 'Mobility', 'Wave Control'];
-        const stats = {};
-        categories.forEach(cat => stats[cat] = 0);
-
-        if (teamList.length === 0) return stats;
-
-        categories.forEach(cat => {
-            const values = teamList.map(h => state.heroData[h] ? state.heroData[h].stats[cat] : 0);
-            if (values.length === 0) { stats[cat] = 0; return; }
-
-            const maxVal = Math.max(...values);
-            const totalSum = values.reduce((a, b) => a + b, 0);
-            const countOthers = values.length - 1;
-            const avgOthers = countOthers > 0 ? (totalSum - maxVal) / countOthers : 0;
-
-            stats[cat] = (maxVal * 0.7) + (avgOthers * 0.3);
-        });
-        return stats;
-    }
-
-    // [2] RENDER BUTTERFLY CHART (Tornado Chart)
-    function renderChart() {
-        const blueStats = calculateStats(state.blueTeam);
-        const redStats = calculateStats(state.redTeam);
-        const container = document.getElementById('radar-chart');
-        
-        // Butterfly Chart Config
-        const width = 300;
-        const height = 220;
-        const center = width / 2;
-        const barHeight = 20;
-        const rowGap = 15; // Gap between bars vertically
-        const maxBarWidth = 100; // Represents stat 10
-        
-        const categories = ['Durability', 'Offense', 'Crowd Control', 'Mobility', 'Wave Control'];
-        const emojiMap = {
-            'Durability': '🛡️',
-            'Offense': '⚔️',
-            'Crowd Control': '⚡',
-            'Mobility': '🏃',
-            'Wave Control': '🧠'
-        };
-
-        let svgHtml = '';
-
-        // Center line
-        svgHtml += `<line x1="${center}" y1="10" x2="${center}" y2="${height}" stroke="#334155" stroke-width="1" stroke-dasharray="4"/>`;
-
-        categories.forEach((cat, i) => {
-            const y = 30 + (i * (barHeight + rowGap));
-            const bVal = blueStats[cat];
-            const rVal = redStats[cat];
-
-            // Calculate widths based on max stat 10
-            const bWidth = (bVal / 10) * maxBarWidth;
-            const rWidth = (rVal / 10) * maxBarWidth;
-
-            // Blue Bar (Left side)
-            const bX = center - bWidth;
-            // Red Bar (Right side)
-            
-            // Label (Above)
-            svgHtml += `<text x="${center}" y="${y - 5}" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="600">${emojiMap[cat] || ''} ${cat}</text>`;
-
-            // Draw Blue Bar
-            svgHtml += `<rect x="${bX}" y="${y}" width="${bWidth}" height="${barHeight}" fill="var(--accent-blue)" rx="4" />`;
-            // Draw Red Bar
-            svgHtml += `<rect x="${center}" y="${y}" width="${rWidth}" height="${barHeight}" fill="var(--accent-red)" rx="4" />`;
-
-            // Values
-            // Blue Value Text (Left of bar)
-            if (bVal > 0) {
-                svgHtml += `<text x="${bX - 5}" y="${y + 14}" fill="#60a5fa" font-size="10" text-anchor="end" font-family="monospace">${bVal.toFixed(1)}</text>`;
-            }
-            // Red Value Text (Right of bar)
-            if (rVal > 0) {
-                svgHtml += `<text x="${center + rWidth + 5}" y="${y + 14}" fill="#f87171" font-size="10" text-anchor="start" font-family="monospace">${rVal.toFixed(1)}</text>`;
-            }
-        });
-
-        const svg = `
-            <svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-                ${svgHtml}
-            </svg>
-        `;
-        container.innerHTML = svg;
-    }
-
-    function calculateAnalysis() {
-        const blueStats = calculateStats(state.blueTeam);
-        const redStats = calculateStats(state.redTeam);
-
-        const blueTotal = Object.values(blueStats).reduce((a, b) => a + b, 0);
-        const redTotal = Object.values(redStats).reduce((a, b) => a + b, 0);
-        const total = blueTotal + redTotal || 1;
-
-        const blueProb = (blueTotal / total) * 100;
-        const redProb = 100 - blueProb;
-
-        const winrateContainer = document.getElementById('winrate-container');
-        if (state.blueTeam.length === 0 && state.redTeam.length === 0) {
-            winrateContainer.style.display = 'none';
-        } else {
-            winrateContainer.style.display = 'flex';
-            
-            document.getElementById('blue-prob-text').innerText = blueProb.toFixed(2) + '%';
-            document.getElementById('red-prob-text').innerText = redProb.toFixed(2) + '%';
-
-            const gradientStop = blueProb.toFixed(1); 
-            document.getElementById('bar-gradient').style.background = 
-                `linear-gradient(90deg, var(--accent-blue) ${gradientStop}%, var(--accent-red) ${gradientStop}%)`;
-        }
-
-        // [1] Changed default text
-        let advHtml = '';
-        Object.keys(blueStats).forEach(key => {
-            if (blueStats[key] > redStats[key]) {
-                advHtml += `<div class="advantage-item"><span class="blue-text">${key}</span> <span>Blue +${(blueStats[key]-redStats[key]).toFixed(1)}</span></div>`;
-            } else if (redStats[key] > blueStats[key]) {
-                advHtml += `<div class="advantage-item"><span class="red-text">${key}</span> <span>Red +${(redStats[key]-blueStats[key]).toFixed(1)}</span></div>`;
-            }
-        });
-
-        // If no advantages are calculated (teams are empty or perfectly equal), and specifically if no heroes are picked
-        if (!advHtml && (state.blueTeam.length === 0 && state.redTeam.length === 0)) {
-            document.getElementById('advantages').innerHTML = '<div style="text-align:center; color:var(--text-muted);">No heroes being picked</div>';
-        } else if (!advHtml) {
-             document.getElementById('advantages').innerHTML = '<div style="text-align:center; color:var(--text-muted);">Teams are balanced.</div>';
-        } else {
-            document.getElementById('advantages').innerHTML = advHtml;
-        }
-
-        const side = state.blueTeam.length <= state.redTeam.length ? 'blue' : 'red';
-        const myStats = side === 'blue' ? blueStats : redStats;
-        const weakest = Object.keys(myStats).reduce((a, b) => myStats[a] < myStats[b] ? a : b);
-        
-        const picked = new Set([...state.blueTeam, ...state.redTeam]);
-        let bestHero = null; let maxScore = -1;
-        
-        Object.keys(state.heroData).forEach(h => {
-            if (!picked.has(h)) {
-                const score = state.heroData[h].stats[weakest];
-                if (score > maxScore) { maxScore = score; bestHero = h; }
-            }
-        });
-
-        const suggestBox = document.getElementById('suggestion');
-        if (bestHero) {
-            suggestBox.style.display = 'block';
-            document.getElementById('suggestion-text').innerText = 
-                `${side.toUpperCase()} team is weak in ${weakest}. Consider picking ${bestHero} (${state.heroData[bestHero].roles[0]}).`;
-        } else {
-            suggestBox.style.display = 'none';
-        }
+        fetchAnalysis();
     }
 
     // --- INTERACTIVE BACKGROUND ANIMATION ---
@@ -1166,16 +1154,9 @@
     let width, height;
     let particles = [];
     
-    const mouse = {
-        x: null,
-        y: null,
-        radius: 150
-    };
+    const mouse = { x: null, y: null, radius: 150 };
 
-    window.addEventListener('mousemove', (e) => {
-        mouse.x = e.x;
-        mouse.y = e.y;
-    });
+    window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
 
     function resize() {
         width = canvas.width = window.innerWidth;
@@ -1191,8 +1172,6 @@
             this.vx = (Math.random() - 0.5) * 1;
             this.vy = (Math.random() - 0.5) * 1;
             this.size = Math.random() * 2 + 1;
-            this.baseX = this.x;
-            this.baseY = this.y;
             this.density = (Math.random() * 30) + 1;
         }
 
@@ -1210,15 +1189,12 @@
             if (distance < mouse.radius) {
                 const forceDirectionX = dx / distance;
                 const forceDirectionY = dy / distance;
-                const maxDistance = mouse.radius;
-                const force = (maxDistance - distance) / maxDistance;
+                const force = (mouse.radius - distance) / mouse.radius;
                 const directionX = forceDirectionX * force * this.density;
                 const directionY = forceDirectionY * force * this.density;
                 
                 this.x -= directionX;
                 this.y -= directionY;
-            } else {
-                // Keep floating
             }
         }
 
