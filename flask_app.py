@@ -1,11 +1,13 @@
 import pandas as pd
 import random
+import os
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from data_analyzer import DataAnalyzer
 
 # --- CONFIGURATION ---
-EXCEL_FILE = 'Analyst.xlsx'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+EXCEL_FILE = os.path.join(BASE_DIR, 'Analyst.xlsx')
 SHEET_NAME = 'Hero Data'
 
 analyzer = DataAnalyzer()
@@ -26,11 +28,7 @@ def load_data():
     """Extracts info from Hero Data sheet and structures it."""
     global hero_data, available_heroes_list
 
-    try:
-        df = pd.read_excel(EXCEL_FILE, sheet_name=SHEET_NAME)
-    except FileNotFoundError:
-        print(f"Error: Could not find {EXCEL_FILE}")
-        return
+    df = pd.read_excel(EXCEL_FILE, sheet_name=SHEET_NAME)
 
     df.replace('N/A', pd.NA, inplace=True)
 

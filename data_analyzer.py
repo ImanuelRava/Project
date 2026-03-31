@@ -19,23 +19,23 @@ class DataAnalyzer:
         return None
 
     def load_local_data(self):
-        file_path = 'Analyst.xlsx'
-        actual_path = self.find_file(file_path)
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(script_dir, 'Analyst.xlsx')
         
-        if actual_path:
-            print(f"Found {actual_path}. Processing tournament data...")
-            success, msg = self.process_file(actual_path)
+        if os.path.exists(file_path):
+            print(f"Found {file_path}. Processing tournament data...")
+            success, msg = self.process_file(file_path)
             if success:
                 print("Tournament data loaded successfully.")
                 self.is_loaded = True
             else:
                 print(f"Failed to load tournament data: {msg}")
         else:
-            print("Analyst.xlsx not found.")
+            print(f"CRITICAL: File not found at {file_path}")
 
     def process_file(self, file_path):
         try:
-            df_raw = pd.read_excel(file_path, sheet_name=0, header=None)
+            df_raw = pd.read_excel(file_path, sheet_name='MLBB Statistics', header=None)
             
             # Find Header Row
             header_row_idx = None
