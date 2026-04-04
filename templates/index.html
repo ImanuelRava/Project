@@ -3,89 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/Beartic.ico" type="image/x-icon">
     <title>Beartic</title>
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --bg-card: rgba(30, 41, 59, 0.7);
-            --bg-input: rgba(51, 65, 85, 0.7);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --bg-dark: #0b1120;
+            --bg-card: rgba(22, 33, 55, 0.75);
+            --bg-input: rgba(38, 52, 78, 0.65);
+            --bg-hover: rgba(255,255,255,0.04);
+            --text-main: #e8edf5;
+            --text-muted: #7a8ba8;
             --accent-blue: #3b82f6;
             --accent-red: #ef4444;
             --accent-green: #10b981;
             --accent-purple: #8b5cf6;
-            --border: rgba(255, 255, 255, 0.1);
+            --accent-orange: #f97316;
+            --accent-cyan: #06b6d4;
+            --accent-yellow: #eab308;
+            --border: rgba(255,255,255,0.08);
+            --border-active: rgba(255,255,255,0.18);
+            --radius: 10px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.35);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            background-color: var(--bg-dark);
+            background: var(--bg-dark);
             color: var(--text-main);
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
             overflow-x: hidden;
+            line-height: 1.5;
         }
 
         #bg-canvas {
             position: fixed;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
             z-index: -1;
             pointer-events: none;
         }
 
+        /* --- HEADER --- */
         header {
             background: var(--bg-card);
-            padding: 1rem 2rem;
+            padding: 0.85rem 2rem;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: relative;
-            z-index: 10;
-            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(16px) saturate(1.4);
         }
-        
-        .brand-container { display: flex; flex-direction: column; }
 
-        h1 { 
-            font-size: 1.25rem; 
-            font-weight: 700; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            margin-bottom: 2px;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .logo-icon { width: 24px; height: 24px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-red)); border-radius: 6px; }
-        .creator-text { font-size: 0.75rem; color: var(--text-muted); padding-left: 34px; }
-        
-        nav { display: flex; gap: 1rem; flex-wrap: wrap; }
-        button.tab-btn {
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            object-fit: contain;
+            box-shadow: 0 0 12px rgba(59,130,246,0.35);
+        }
+
+        .brand h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-sub {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+            margin-top: 1px;
+        }
+
+        nav {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .tab-btn {
             background: transparent;
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            padding: 0.5rem 1rem;
+            padding: 0.45rem 0.9rem;
             font-weight: 600;
-            border-bottom: 2px solid transparent;
+            border-radius: 6px;
             transition: all 0.2s;
-            font-size: 0.9rem;
+            font-size: 0.82rem;
+            position: relative;
         }
-        button.tab-btn.active { color: var(--text-main); border-bottom-color: var(--accent-blue); }
-        button.tab-btn:hover { color: var(--text-main); }
 
-        main { flex: 1; padding: 2rem; max-width: 1400px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; position: relative; z-index: 5; }
+        .tab-btn.active {
+            color: var(--text-main);
+            background: rgba(59,130,246,0.12);
+        }
 
-        .section { display: none; animation: fadeIn 0.3s ease; flex: 1; }
-        .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.85rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 2px;
+            background: var(--accent-blue);
+            border-radius: 1px;
+        }
 
-        /* --- SVG ICON STYLES --- */
+        .tab-btn:hover:not(.active) {
+            color: var(--text-main);
+            background: var(--bg-hover);
+        }
+
+        /* --- MAIN --- */
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1440px;
+            margin: 0 auto;
+            width: 100%;
+            position: relative;
+            z-index: 5;
+        }
+
+        .section {
+            display: none;
+            animation: fadeUp 0.35s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .icon-svg {
             width: 1em;
             height: 1em;
@@ -97,21 +169,26 @@
             fill: none;
         }
 
-        /* --- ANALYZER STYLES --- */
+        /* --- CARDS --- */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        /* --- ANALYZER LAYOUT --- */
         .analyzer-grid {
             display: grid;
-            grid-template-columns: 1fr 400px 1fr;
-            gap: 2rem;
+            grid-template-columns: 1fr 420px 1fr;
+            gap: 1.5rem;
             align-items: start;
         }
 
         .team-column {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid var(--border);
-            min-height: 500px;
+            padding: 1.25rem;
+            min-height: 480px;
             display: flex;
             flex-direction: column;
         }
@@ -119,318 +196,415 @@
         .team-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
+            align-items: flex-start;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.85rem;
             border-bottom: 1px solid var(--border);
         }
-        .team-title { font-size: 1.2rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+
+        .team-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
         .blue-text { color: var(--accent-blue); }
         .red-text { color: var(--accent-red); }
 
-        .hero-list { display: flex; flex-direction: column; gap: 0.75rem; flex: 1; }
-        
+        .hero-count {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .winrate-badge {
+            font-size: 1.6rem;
+            font-weight: 900;
+            text-align: right;
+            letter-spacing: -0.03em;
+        }
+
+        .winrate-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: block;
+            margin-bottom: 1px;
+        }
+
+        .hero-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
         .hero-card {
             display: flex;
             align-items: center;
             background: var(--bg-input);
-            padding: 0.75rem;
+            padding: 0.6rem 0.75rem;
             border-radius: 8px;
             border: 1px solid transparent;
-            position: relative;
+            transition: all 0.2s;
         }
-        
-        .hero-card:hover { border-color: rgba(255,255,255,0.2); }
-        
-        .hero-avatar {
-            width: 40px; height: 40px; border-radius: 6px; margin-right: 12px;
-            background-color: rgba(71, 85, 105, 0.8); display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 1.2rem; text-transform: uppercase;
-        }
-        .hero-card img { width: 40px; height: 40px; border-radius: 6px; margin-right: 12px; object-fit: cover; background: #000; }
-        
-        .hero-info { flex: 1; }
-        .hero-info h4 { font-size: 0.95rem; margin-bottom: 2px; }
-        .hero-info p { font-size: 0.75rem; color: var(--text-muted); }
-        
-        .hero-actions { display: flex; align-items: center; gap: 8px; }
 
-        .info-btn {
+        .hero-card:hover {
+            border-color: var(--border-active);
+            background: var(--bg-hover);
+        }
+
+        .hero-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            margin-right: 10px;
+            background: rgba(71,85,105,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .hero-card img {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            margin-right: 10px;
+            object-fit: cover;
+            background: #000;
+            flex-shrink: 0;
+        }
+
+        .hero-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .hero-info h4 {
+            font-size: 0.88rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hero-info p {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .info-btn,
+        .remove-btn {
             background: transparent;
             border: none;
-            color: var(--accent-blue);
             cursor: pointer;
             padding: 4px;
             border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.15s;
         }
-        .info-btn:hover { background: rgba(59, 130, 246, 0.2); }
 
-        .remove-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 0 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .remove-btn:hover { color: var(--accent-red); }
+        .info-btn { color: var(--accent-cyan); }
+        .info-btn:hover { background: rgba(6,182,212,0.15); }
+        .remove-btn { color: var(--text-muted); }
+        .remove-btn:hover { color: var(--accent-red); background: rgba(239,68,68,0.12); }
 
         .add-hero-btn {
             width: 100%;
-            padding: 1rem;
-            margin-top: 1rem;
+            padding: 0.85rem;
+            margin-top: 0.75rem;
             background: var(--bg-input);
             border: 1px dashed var(--border);
             color: var(--text-muted);
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
-            backdrop-filter: blur(5px);
+            font-weight: 600;
+            font-size: 0.85rem;
         }
-        .add-hero-btn:hover { border-color: var(--text-main); color: var(--text-main); background: rgba(255,255,255,0.05); }
+
+        .add-hero-btn:hover {
+            border-color: var(--text-main);
+            color: var(--text-main);
+            background: var(--bg-hover);
+        }
+
         .hidden { display: none !important; }
 
+        .strategy-block {
+            margin-top: 1rem;
+            padding-top: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .strategy-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .strategy-text {
+            font-size: 0.82rem;
+            line-height: 1.45;
+            color: var(--text-main);
+        }
+
+        /* --- CENTER PANEL --- */
         .analysis-panel {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 1.25rem;
             position: sticky;
-            top: 2rem;
+            top: 5rem;
         }
 
-        .action-btn-group { display: flex; flex-direction: column; gap: 0.5rem; }
-
-        /* --- Suggestion Box --- */
-        .suggestion-box {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid var(--accent-green);
-            color: var(--accent-green);
-            padding: 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            display: none;
-            margin-top: 1.5rem;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        .suggestion-title {
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            margin-bottom: 4px;
-            display: block;
-        }
-
-        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-        /* --- Circular Progress Charts --- */
-        .circles-container {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid var(--border);
+        .action-btn-group {
             display: flex;
-            justify-content: space-around;
-            align-items: center;
+            gap: 0.5rem;
         }
 
-        .circle-wrapper {
-            position: relative;
-            width: 120px;
-            height: 120px;
-        }
-
-        .circle-svg {
-            transform: rotate(-90deg);
-            width: 100%;
-            height: 100%;
-        }
-
-        .circle-bg {
-            fill: none;
-            stroke: rgba(255,255,255,0.05);
-            stroke-width: 8;
-        }
-
-        .circle-progress {
-            fill: none;
-            stroke-width: 8;
-            stroke-linecap: round;
-            transition: stroke-dashoffset 0.5s ease;
-        }
-
-        .circle-blue { stroke: var(--accent-blue); }
-        .circle-red { stroke: var(--accent-red); }
-
-        .circle-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }
-        
-        .circle-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: block;
-            margin-bottom: 2px;
-        }
-        
-        .circle-value {
-            font-size: 1.2rem;
-            font-weight: 700;
-            display: block;
-        }
-
-        .vs-text {
-            font-size: 1.5rem;
-            font-weight: 900;
-            font-style: italic;
-            color: var(--text-muted);
-            opacity: 0.5;
-        }
-
-        /* --- Comparison Table --- */
-        .stats-table-box {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
-
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-        .comparison-table th {
-            text-align: center;
-            color: var(--text-muted);
-            font-weight: 600;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border);
-        }
-        .comparison-table th.stat-name { text-align: left; }
-        
-        .comparison-table td {
-            padding: 0.6rem 0.4rem;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            text-align: center;
-        }
-        .comparison-table tr:last-child td { border-bottom: none; }
-        
-        .diff-positive { color: var(--accent-blue); font-weight: 700; }
-        .diff-negative { color: var(--accent-red); font-weight: 700; }
-
-        .btn-reset, .btn-ban {
-            padding: 0.8rem;
+        .btn-action {
+            flex: 1;
+            padding: 0.7rem 0.5rem;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 0.78rem;
             transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             border: 1px solid transparent;
-            width: 100%;
+            letter-spacing: 0.02em;
         }
 
         .btn-reset {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: var(--accent-red);
+            background: rgba(239,68,68,0.08);
+            border-color: rgba(239,68,68,0.3);
             color: var(--accent-red);
         }
-        .btn-reset:hover { background: var(--accent-red); color: white; }
+        .btn-reset:hover { background: var(--accent-red); color: #fff; border-color: var(--accent-red); }
 
         .btn-ban {
-            background: rgba(139, 92, 246, 0.1);
-            border-color: var(--accent-purple);
+            background: rgba(139,92,246,0.08);
+            border-color: rgba(139,92,246,0.3);
             color: var(--accent-purple);
         }
-        .btn-ban:hover { background: var(--accent-purple); color: white; }
+        .btn-ban:hover { background: var(--accent-purple); color: #fff; border-color: var(--accent-purple); }
 
-
-        /* --- NEW SCOUTING SECTION STYLES --- */
-        .scout-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-
-        .scout-column {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
+        .suggestion-box {
+            padding: 1rem 1.15rem;
+            border-radius: var(--radius);
             border: 1px solid var(--border);
-            padding: 1.5rem;
+            border-left: 3px solid var(--accent-green);
+            background: rgba(16,185,129,0.05);
         }
 
-        .scout-subsection {
-            margin-bottom: 2rem;
+        .suggestion-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
         }
-        .scout-subsection:last-child { margin-bottom: 0; }
 
-        .scout-header {
-            font-size: 0.95rem;
+        .suggestion-title {
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            color: var(--accent-green);
+            letter-spacing: 0.08em;
+        }
+
+        .suggestion-text {
+            font-size: 0.82rem;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .radar-container {
+            width: 100%;
+            height: 360px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-input);
+            border-radius: var(--radius);
+            padding: 0.5rem;
+        }
+
+        /* --- ARCHETYPE BARS --- */
+        .archetype-section { margin-top: -6px; margin-bottom: 4px; }
+
+        .archetype-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 0.72rem;
+        }
+
+        .archetype-label {
+            width: 72px;
+            text-align: right;
+            color: var(--text-muted);
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .archetype-bars {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .archetype-bar-track {
+            height: 7px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .archetype-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            min-width: 0;
+        }
+
+        .fill-blue { background: linear-gradient(90deg, rgba(59,130,246,0.3), var(--accent-blue)); }
+        .fill-red { background: linear-gradient(90deg, rgba(239,68,68,0.3), var(--accent-red)); }
+
+        /* --- STATS TABLE --- */
+        .stats-table-box { padding: 1.15rem; }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        .comparison-table th {
+            text-align: center;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .comparison-table th.stat-name { text-align: left; }
+
+        .comparison-table td {
+            padding: 0.5rem 0.3rem;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            text-align: center;
+        }
+
+        .comparison-table tr:last-child td { border-bottom: none; }
+        .diff-pos { color: var(--accent-blue); font-weight: 800; }
+        .diff-neg { color: var(--accent-red); font-weight: 800; }
+
+        .stat-val-cell { position: relative; }
+
+        .stat-mini-bar {
+            position: absolute;
+            bottom: 2px;
+            left: 4px;
+            right: 4px;
+            height: 3px;
+            border-radius: 2px;
+            opacity: 0.35;
+        }
+
+        /* --- SECTION HEADERS --- */
+        .section-header {
+            font-size: 0.82rem;
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
             border-bottom: 1px solid var(--border);
         }
 
-        /* --- NEW: NODE GRAPH STYLES --- */
+        /* --- SCOUTING --- */
+        .scout-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 1.5rem;
+        }
+
+        .scout-column {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scout-subsection { margin-bottom: 1.5rem; }
+        .scout-subsection:last-child { margin-bottom: 0; }
+
         .graph-container {
             position: relative;
             width: 100%;
-            height: 380px; /* Fixed height for the canvas */
-            background: rgba(0,0,0,0.2);
-            border-radius: 12px;
+            height: 560px;
+            background: rgba(0,0,0,0.25);
+            border-radius: var(--radius);
             overflow: hidden;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
         .graph-svg {
             position: absolute;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* Let clicks pass through to nodes */
+            pointer-events: none;
         }
 
         .graph-edge {
             stroke: var(--accent-blue);
             stroke-linecap: round;
-            opacity: 0.4;
-            transition: all 0.3s ease;
+            opacity: 0.3;
+            transition: all 0.3s;
             cursor: pointer;
-            pointer-events: stroke; /* Allow hovering the line */
+            pointer-events: stroke;
         }
-        
+
         .graph-edge:hover {
             stroke: #fff;
             opacity: 1;
-            stroke-width: 4px !important; /* Force thicker on hover */
+            stroke-width: 4px !important;
         }
 
         .graph-node {
             position: absolute;
-            width: 50px;
-            height: 50px;
+            width: 46px;
+            height: 46px;
             border-radius: 50%;
             background: var(--bg-input);
             border: 2px solid var(--border);
@@ -452,54 +626,143 @@
         }
 
         .graph-node:hover {
-            transform: translate(-50%, -50%) scale(1.2);
+            transform: translate(-50%, -50%) scale(1.25);
             border-color: var(--accent-blue);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+            box-shadow: 0 0 18px rgba(59,130,246,0.5);
             z-index: 20;
         }
 
         .graph-node-label {
             position: absolute;
-            bottom: -20px;
+            bottom: -18px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.7rem;
+            font-size: 0.62rem;
             white-space: nowrap;
             color: var(--text-muted);
             pointer-events: none;
-            font-weight: 600;
+            font-weight: 700;
         }
 
-        /* Priority List Styles */
         .priority-list {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.35rem;
         }
+
         .priority-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 0.5rem 0.65rem;
+            border-radius: 6px;
+            background: var(--bg-input);
+            border: 1px solid transparent;
+            transition: border-color 0.2s;
         }
-        .priority-name { display: flex; align-items: center; gap: 10px; font-weight: 600; }
-        .priority-stats { font-size: 0.8rem; color: var(--text-muted); }
 
-        /* --- BAN MODAL IMPROVED STYLES --- */
-        .ban-modal-container {
-            background: var(--bg-card);
-            backdrop-filter: blur(12px);
-            width: 90%;
-            max-width: 900px;
-            max-height: 85vh;
-            border-radius: 12px;
-            border: 1px solid var(--border);
+        .priority-item:hover { border-color: var(--border-active); }
+
+        .priority-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .priority-stats {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* --- META --- */
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .meta-column {
+            padding: 1.25rem;
             display: flex;
             flex-direction: column;
         }
-        
-        .ban-split-view {
+
+        .meta-stat-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.65rem;
+            background: var(--bg-input);
+            padding: 0.65rem 0.85rem;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .meta-stat-row:hover { border-color: var(--border-active); }
+
+        .meta-stat-img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .meta-stat-name {
+            font-weight: 700;
+            font-size: 0.85rem;
+            min-width: 90px;
+        }
+
+        .meta-stat-vals {
+            text-align: right;
+            min-width: 50px;
+        }
+
+        .meta-stat-primary {
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+
+        .meta-stat-sub {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .progress-track {
+            flex: 1;
+            height: 5px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        .fill-green { background: var(--accent-green); }
+        .fill-red { background: var(--accent-red); }
+        .fill-blue { background: var(--accent-blue); }
+        .fill-purple { background: var(--accent-purple); }
+
+        /* --- BAN MODAL --- */
+        .ban-modal-box {
+            width: 90%;
+            max-width: 880px;
+            max-height: 85vh;
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ban-split {
             display: flex;
             height: 100%;
             overflow: hidden;
@@ -509,319 +772,614 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid var(--border);
         }
-        .ban-side:last-child { border-right: none; }
+
+        .ban-side:first-child { border-right: 1px solid var(--border); }
 
         .ban-side-header {
-            padding: 1rem 1.5rem;
+            padding: 0.85rem 1.25rem;
             background: rgba(0,0,0,0.2);
             border-bottom: 1px solid var(--border);
         }
-        
+
         .ban-side-header h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
+            font-size: 0.95rem;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1px;
+            display: inline-block;
+            padding-bottom: 3px;
         }
 
-        .blue-header h3 { color: var(--accent-blue); border-bottom: 2px solid var(--accent-blue); display: inline-block; padding-bottom: 4px; }
-        .red-header h3 { color: var(--accent-red); border-bottom: 2px solid var(--accent-red); display: inline-block; padding-bottom: 4px; }
-
-        .ban-list-container {
-            padding: 1.5rem;
+        .ban-list-scroll {
+            padding: 1.25rem;
             overflow-y: auto;
             flex: 1;
         }
 
-        .ban-item-improved {
+        .ban-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: var(--bg-input);
-            padding: 1rem;
+            padding: 0.85rem;
             border-radius: 8px;
-            margin-bottom: 1rem;
-            border-left: 4px solid transparent;
+            margin-bottom: 0.75rem;
+            border-left: 3px solid var(--accent-red);
         }
-        .ban-item-improved.blue { border-left-color: var(--accent-blue); }
-        .ban-item-improved.red { border-left-color: var(--accent-red); }
 
         .ban-hero-info {
             display: flex;
             align-items: center;
-            gap: 12px;
-        }
-        .ban-hero-name { font-weight: 700; font-size: 1rem; }
-        
-        .ban-reason-badge {
-            font-size: 0.75rem;
-            background: rgba(239, 68, 68, 0.15);
-            color: #fca5a5;
-            padding: 4px 8px;
-            border-radius: 4px;
-            text-align: right;
-            line-height: 1.2;
+            gap: 10px;
         }
 
-        /* --- STATS TABLE STYLES (Hero Stats Tab) --- */
+        .ban-hero-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        .ban-hero-name {
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+
+        .ban-reason {
+            font-size: 0.68rem;
+            background: rgba(239,68,68,0.12);
+            color: #fca5a5;
+            padding: 3px 7px;
+            border-radius: 4px;
+            text-align: right;
+            line-height: 1.3;
+            max-width: 180px;
+        }
+
+        /* --- FILTERS --- */
         .filters {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
+            gap: 0.85rem;
+            margin-bottom: 1.5rem;
             flex-wrap: wrap;
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid var(--border);
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius);
             align-items: flex-end;
         }
 
-        .filter-group { display: flex; flex-direction: column; }
-        .filter-group label { font-size:0.8rem; color:var(--text-muted); margin-bottom:4px; }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
 
         select {
             background: var(--bg-input);
-            backdrop-filter: blur(5px);
             color: var(--text-main);
             border: 1px solid var(--border);
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.75rem;
             border-radius: 6px;
             outline: none;
-            min-width: 150px;
+            min-width: 120px;
+            font-size: 0.82rem;
+            transition: border-color 0.2s;
         }
 
-        .table-container {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            border: 1px solid var(--border);
+        select:hover { border-color: var(--border-active); }
+        select:focus { border-color: var(--accent-blue); }
+
+        /* --- TABLES --- */
+        .table-wrap {
+            border-radius: var(--radius);
             overflow-x: auto;
         }
 
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
-        th { background: rgba(0,0,0,0.2); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; user-select: none; }
-        th:hover { background: rgba(255,255,255,0.05); }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem 0.85rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: rgba(0,0,0,0.2);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            user-select: none;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        th:hover { background: var(--bg-hover); }
         tr:last-child td { border-bottom: none; }
-        tr:hover td { background: rgba(255,255,255,0.02); }
-        
-        .win-rate-high { color: var(--accent-green); font-weight: bold; }
-        .win-rate-low { color: var(--accent-red); font-weight: bold; }
+        tr:hover td { background: var(--bg-hover); }
+        .wr-high { color: var(--accent-green); font-weight: 800; }
+        .wr-low { color: var(--accent-red); font-weight: 800; }
 
-        .stat-hero-cell { display: flex; align-items: center; gap: 12px; font-weight: 600; }
-        .stat-hero-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
-        .phase-cell { text-align: center; font-family: monospace; font-size: 0.9rem; }
+        .stat-hero-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-        /* --- MATCH VIEWER STYLES --- */
-        .match-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
-        
+        .stat-hero-img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid var(--border);
+        }
+
+        .phase-cell {
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* --- MATCH HISTORY --- */
+        .match-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 1.25rem;
+        }
+
         .match-card {
-            background: var(--bg-card); backdrop-filter: blur(10px); border: 1px solid var(--border);
-            border-radius: 8px; overflow: hidden; transition: transform 0.2s, border-color 0.2s;
-            cursor: pointer; position: relative;
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+            cursor: pointer;
+            position: relative;
         }
 
-        .match-card:hover { transform: translateY(-3px); border-color: var(--text-muted); }
-
-        .match-header {
-            padding: 0.75rem 1rem; background: rgba(0,0,0,0.2);
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 0.85rem; color: var(--text-muted);
+        .match-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-active);
         }
 
-        .chevron { 
-            transition: transform 0.3s ease; 
-            display: flex; 
-            align-items: center; 
+        .match-top {
+            padding: 0.65rem 0.85rem;
+            background: rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
         }
-        .match-card.active .chevron { transform: rotate(180deg); }
+
+        .chevron {
+            transition: transform 0.3s;
+            display: flex;
+        }
+
+        .match-card.open .chevron { transform: rotate(180deg); }
 
         .btn-import {
-            background: rgba(16, 185, 129, 0.2);
-            border: 1px solid var(--accent-green);
+            background: rgba(16,185,129,0.15);
+            border: 1px solid rgba(16,185,129,0.4);
             color: var(--accent-green);
-            padding: 0.25rem 0.75rem;
+            padding: 0.2rem 0.6rem;
             border-radius: 4px;
-            font-size: 0.75rem;
+            font-size: 0.68rem;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
             transition: all 0.2s;
         }
-        .btn-import:hover { background: var(--accent-green); color: white; }
 
-        .match-body { padding: 1rem; }
-        
-        .team-score { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; font-weight: 700; }
-        .winner { color: var(--accent-green); }
-        .loser { color: var(--text-muted); opacity: 0.7; }
-
-        .phase-label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; letter-spacing: 0.05em; }
-
-        .draft-preview { display: flex; gap: 4px; margin-top: 0.5rem; justify-content: space-between; }
-        
-        .mini-icon {
-            width: 32px; height: 32px; background: var(--bg-input); border-radius: 6px;
-            display: flex; align-items: center; justify-content: center; font-size: 0.6rem;
-            overflow: hidden; border: 1px solid transparent; transition: border-color 0.2s; box-sizing: border-box;
+        .btn-import:hover {
+            background: var(--accent-green);
+            color: #fff;
+            border-color: var(--accent-green);
         }
+
+        .match-body { padding: 0.85rem; }
+
+        .team-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+
+        .winner { color: var(--accent-green); }
+        .loser { color: var(--text-muted); opacity: 0.6; }
+
+        .draft-icons {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .mini-icon {
+            width: 30px;
+            height: 30px;
+            background: var(--bg-input);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55rem;
+            font-weight: 800;
+            overflow: hidden;
+            border: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
         .match-card:hover .mini-icon { border-color: var(--border); }
-        .mini-icon img { width: 100%; height: 100%; object-fit: cover; }
 
-        .mini-icon.ban-blue { border: 2px solid var(--accent-blue); }
-        .mini-icon.ban-red { border: 2px solid var(--accent-red); }
+        .mini-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-        .match-bans { display: none; background: rgba(0,0,0,0.15); padding: 1rem; border-top: 1px solid var(--border); }
-        .match-bans.open { display: block; animation: slideDown 0.3s ease-out; }
+        .mini-icon.ban-b { border: 1.5px solid var(--accent-blue); }
+        .mini-icon.ban-r { border: 1.5px solid var(--accent-red); }
 
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .match-bans {
+            display: none;
+            background: rgba(0,0,0,0.15);
+            padding: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
 
-        .ban-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
-        .ban-row:last-child { margin-bottom: 0; }
+        .match-bans.open {
+            display: block;
+            animation: slideDown 0.25s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ban-section-label {
+            font-size: 0.58rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .ban-phase-row {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 6px;
+        }
+
+        .ban-phase-row:last-child { margin-bottom: 0; }
+
+        .ban-phase-label {
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            font-weight: 800;
+            width: 18px;
+            flex-shrink: 0;
+            opacity: 0.7;
+            text-align: right;
+            padding-right: 6px;
+        }
+
+        .ban-side-icons {
+            flex: 1;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .ban-side-icons.red-side { justify-content: flex-end; }
+
+        .ban-center-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+            margin: 0 8px;
+            flex-shrink: 0;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0.65rem 0;
+        }
 
         /* --- MODALS --- */
         .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
-            display: none; justify-content: center; align-items: center;
-            z-index: 1000; backdrop-filter: blur(4px);
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(6px);
         }
+
         .modal {
-            background: var(--bg-card); backdrop-filter: blur(12px); width: 90%; max-width: 600px; max-height: 80vh;
-            border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column;
+            width: 90%;
+            max-width: 560px;
+            max-height: 80vh;
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
         }
-        .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+
+        .modal-header {
+            padding: 0.85rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
         .modal-search {
-            width: 100%; background: var(--bg-input); border: 1px solid var(--border);
-            color: var(--text-main); padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem;
+            width: calc(100% - 2.5rem);
+            margin: 0.75rem 1.25rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.6rem 0.85rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
         }
+
+        .modal-search:focus { border-color: var(--accent-blue); }
+
         .hero-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 0.5rem; padding: 0 1.5rem 1.5rem; overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+            gap: 0.4rem;
+            padding: 0 1.25rem 1.25rem;
+            overflow-y: auto;
         }
+
         .grid-item {
-            background: var(--bg-input); border: 1px solid transparent;
-            border-radius: 6px; cursor: pointer; text-align: center; padding: 0.5rem;
-            transition: all 0.2s;
+            background: var(--bg-input);
+            border: 1px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            padding: 0.4rem 0.2rem;
+            transition: all 0.15s;
         }
-        .grid-item:hover { border-color: var(--accent-blue); background: var(--bg-card); }
-        .grid-item.picked { opacity: 0.3; pointer-events: none; background: #334155; border-style: dashed; }
-        .grid-item img { width: 40px; height: 40px; border-radius: 4px; margin-bottom: 4px; object-fit: cover; }
-        .grid-item span { display: block; font-size: 0.7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        /* Relations Modal Specifics */
-        .relations-content { padding: 0 1.5rem 1.5rem; overflow-y: auto; }
-        .relation-col { margin-bottom: 1.5rem; }
-        .relation-col h4 { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
-        .relation-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .grid-item:hover {
+            border-color: var(--accent-blue);
+            background: var(--bg-hover);
+        }
+
+        .grid-item.picked {
+            opacity: 0.25;
+            pointer-events: none;
+            border-style: dashed;
+        }
+
+        .grid-item img {
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            margin-bottom: 3px;
+            object-fit: cover;
+        }
+
+        .grid-item span {
+            display: block;
+            font-size: 0.62rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .relations-content {
+            padding: 0 1.25rem 1.25rem;
+            overflow-y: auto;
+        }
+
+        .relation-col { margin-bottom: 1.25rem; }
+
+        .relation-col h4 {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .relation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
         .relation-item {
-            display: flex; align-items: center; justify-content: space-between;
-            background: var(--bg-input); padding: 0.5rem 0.8rem; border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-input);
+            padding: 0.45rem 0.7rem;
+            border-radius: 6px;
         }
-        .rel-name { font-weight: 600; font-size: 0.9rem; }
-        .rel-stats { font-size: 0.8rem; color: var(--text-muted); }
-        .wr-good { color: var(--accent-green); font-weight: bold; }
-        .wr-bad { color: var(--accent-red); font-weight: bold; }
 
-        .loading { text-align: center; padding: 2rem; color: var(--text-muted); }
-        .error { text-align: center; padding: 2rem; color: var(--accent-red); border: 1px solid var(--accent-red); border-radius: 8px; margin-bottom: 1rem; }
+        .rel-name { font-weight: 700; font-size: 0.85rem; }
+        .rel-stats { font-size: 0.75rem; color: var(--text-muted); }
+        .wr-good { color: var(--accent-green); font-weight: 800; }
+        .wr-bad { color: var(--accent-red); font-weight: 800; }
+
+        /* --- TOAST --- */
+        .toast-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 0.7rem 1.1rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            animation: toastIn 0.3s ease;
+            max-width: 380px;
+            border: 1px solid var(--border);
+        }
+
+        .toast.out { animation: toastOut 0.25s ease forwards; }
+        .toast-error { background: rgba(239,68,68,0.18); color: #fca5a5; border-left: 3px solid var(--accent-red); }
+        .toast-warn { background: rgba(234,179,8,0.15); color: #fde68a; border-left: 3px solid var(--accent-yellow); }
+        .toast-ok { background: rgba(16,185,129,0.15); color: #6ee7b7; border-left: 3px solid var(--accent-green); }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes toastOut {
+            to { opacity: 0; transform: translateX(40px); }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .error-msg {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--accent-red);
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            background: rgba(239,68,68,0.06);
+        }
+
+        @media (max-width: 1100px) {
+            .analyzer-grid { grid-template-columns: 1fr 1fr; }
+            .analysis-panel { grid-column: 1 / -1; position: static; }
+        }
+
+        @media (max-width: 768px) {
+            .analyzer-grid { grid-template-columns: 1fr; }
+            .scout-grid, .meta-grid { grid-template-columns: 1fr; }
+            header { flex-direction: column; gap: 0.75rem; padding: 0.75rem 1rem; }
+            nav { width: 100%; overflow-x: auto; }
+            main { padding: 1rem; }
+        }
     </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
+<div class="toast-container" id="toast-container"></div>
 
 <header>
-    <div class="brand-container">
-        <h1>
-            <div class="logo-icon"></div>
-            <i>Beartic's Statistics</i>
+    <div class="brand">
+        <img src="/static/Beartic.ico" alt="Beartic Logo" class="logo-icon">
+        <h1>Beartic's Statistics
+        <p>
+        <div class="brand-sub"><i>Suam habet fortuna rationem.</i></div>
+        </p>
         </h1>
-        <p class="creator-text">Suam habet fortuna rationem.</p>
     </div>
     <nav>
         <button class="tab-btn active" data-tab="analyzer" onclick="switchTab('analyzer')">Draft Analyzer</button>
         <button class="tab-btn" data-tab="scouting" onclick="switchTab('scouting')">Team Scouting</button>
+        <button class="tab-btn" data-tab="meta" onclick="switchTab('meta')">Global Meta</button>
         <button class="tab-btn" data-tab="stats" onclick="switchTab('stats')">Tournament Stats</button>
         <button class="tab-btn" data-tab="database" onclick="switchTab('database')">Match History</button>
     </nav>
 </header>
 
 <main>
-    <!-- ANALYZER SECTION -->
+    <!-- ========== DRAFT ANALYZER ========== -->
     <section id="analyzer" class="section active">
         <div class="analyzer-grid">
-            <!-- Blue Team -->
-            <div class="team-column">
+            <!-- Blue Team Column -->
+            <div class="team-column card">
                 <div class="team-header">
-                    <span class="team-title blue-text">Blue Team</span>
-                    <span id="blue-count">0/5</span>
+                    <div style="display:flex;flex-direction:column;width:100%">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <span class="team-title blue-text">Blue Team</span>
+                            <span id="blue-count" class="hero-count">0/5</span>
+                        </div>
+                        <div id="blue-wr-display" class="winrate-badge blue-text" style="display:none">
+                            <span class="winrate-label">Win Prob</span>
+                            <span id="blue-wr-val">--%</span>
+                        </div>
+                    </div>
                 </div>
                 <div id="blue-list" class="hero-list"></div>
                 <button id="add-blue-btn" class="add-hero-btn" onclick="openModal('blue')">+ Add Hero</button>
-                
-                <!-- Suggestion Box (Blue) -->
-                <div id="blue-suggestion" class="suggestion-box">
-                    <span class="suggestion-title">Analyst Suggestion</span>
-                    <span id="blue-suggestion-text"></span>
+                <div id="blue-strat-block" class="strategy-block" style="display:none">
+                    <div class="strategy-label blue-text">Key Strategy</div>
+                    <div id="blue-strat-text" class="strategy-text"></div>
                 </div>
             </div>
 
-            <!-- Analysis Panel (Center) -->
+            <!-- Center Analysis Panel -->
             <div class="analysis-panel">
                 <div class="action-btn-group">
-                    <!-- Ban Suggestions Button -->
-                    <button class="btn-ban" onclick="openBanModal()">
-                        <svg class="icon-svg" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
-                        </svg>
-                        Analyze Ban Targets
+                    <button class="btn-action btn-ban" onclick="openBanModal()">
+                        <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                        Ban Targets
                     </button>
-                    
-                    <!-- Reset Button -->
-                    <button class="btn-reset" onclick="resetDraft()">
-                        <svg class="icon-svg" viewBox="0 0 24 24">
-                            <path d="M23 4v6h-6"></path>
-                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                        </svg>
-                        Reset Draft
+                    <button class="btn-action btn-reset" onclick="resetDraft()">
+                        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                        Reset
                     </button>
                 </div>
 
-                <!-- Circular Win Probability -->
-                <div class="circles-container">
-                    <!-- Blue Circle -->
-                    <div class="circle-wrapper">
-                        <svg class="circle-svg" viewBox="0 0 100 100">
-                            <circle class="circle-bg" cx="50" cy="50" r="40"></circle>
-                            <circle id="circle-prog-blue" class="circle-progress circle-blue" cx="50" cy="50" r="40"></circle>
-                        </svg>
-                        <div class="circle-text">
-                            <span class="circle-label">Blue</span>
-                            <span class="circle-value blue-text" id="circle-val-blue">50.00%</span>
-                        </div>
+                <div id="suggestion-box" class="suggestion-box" style="display:none">
+                    <div class="suggestion-header">
+                        <svg class="icon-svg" viewBox="0 0 24 24" style="color:var(--accent-green);min-width:18px"><path d="M9 18h6M10 22h4M12 2a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"></path></svg>
+                        <span class="suggestion-title">Smart Suggestion</span>
                     </div>
-
-                    <div class="vs-text">VS</div>
-
-                    <!-- Red Circle -->
-                    <div class="circle-wrapper">
-                        <svg class="circle-svg" viewBox="0 0 100 100">
-                            <circle class="circle-bg" cx="50" cy="50" r="40"></circle>
-                            <circle id="circle-prog-red" class="circle-progress circle-red" cx="50" cy="50" r="40"></circle>
-                        </svg>
-                        <div class="circle-text">
-                            <span class="circle-label">Red</span>
-                            <span class="circle-value red-text" id="circle-val-red">50.00%</span>
-                        </div>
-                    </div>
+                    <p id="suggestion-text" class="suggestion-text"></p>
                 </div>
 
-                <!-- Stats Comparison Table -->
-                <div class="stats-table-box">
+                <div class="radar-container">
+                    <canvas id="comp-radar" width="360" height="350"></canvas>
+                </div>
+                <div style="font-size:0.65rem;color:var(--text-muted);text-align:center;margin-top:-8px;margin-bottom:6px;">
+                    Blue vs Red Composition Stats
+                </div>
+
+                <div id="archetype-section" class="archetype-section" style="display:none"></div>
+
+                <div class="stats-table-box card">
                     <table class="comparison-table">
                         <thead>
                             <tr>
@@ -831,84 +1389,108 @@
                                 <th>Diff</th>
                             </tr>
                         </thead>
-                        <tbody id="comparison-tbody">
-                            <tr><td colspan="4" style="text-align:center; color:var(--text-muted)">Select heroes to see stats</td></tr>
+                        <tbody id="comp-tbody">
+                            <tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Select heroes to compare</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Red Team -->
-            <div class="team-column">
+            <!-- Red Team Column -->
+            <div class="team-column card">
                 <div class="team-header">
-                    <span class="team-title red-text">Red Team</span>
-                    <span id="red-count">0/5</span>
+                    <div style="display:flex;flex-direction:column;width:100%">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <span class="team-title red-text">Red Team</span>
+                            <span id="red-count" class="hero-count">0/5</span>
+                        </div>
+                        <div id="red-wr-display" class="winrate-badge red-text" style="display:none">
+                            <span class="winrate-label">Win Prob</span>
+                            <span id="red-wr-val">--%</span>
+                        </div>
+                    </div>
                 </div>
                 <div id="red-list" class="hero-list"></div>
                 <button id="add-red-btn" class="add-hero-btn" onclick="openModal('red')">+ Add Hero</button>
-                
-                <!-- Suggestion Box (Red) -->
-                <div id="red-suggestion" class="suggestion-box">
-                    <span class="suggestion-title">Analyst Suggestion</span>
-                    <span id="red-suggestion-text"></span>
+                <div id="red-strat-block" class="strategy-block" style="display:none">
+                    <div class="strategy-label red-text">Key Strategy</div>
+                    <div id="red-strat-text" class="strategy-text"></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- NEW: SCOUTING SECTION -->
+    <!-- ========== TEAM SCOUTING ========== -->
     <section id="scouting" class="section">
-        <div class="filters" style="margin-bottom: 1.5rem; align-items: center;">
+        <div class="filters card" style="align-items:center">
             <div style="flex:1">
-                <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:4px;">Select Team to Scout</label>
-                <select id="scout-team-select" style="width:100%; max-width:300px;" onchange="loadTeamSignatures()">
-                    <option value="">Select Team...</option>
+                <label style="font-size:0.68rem;color:var(--text-muted);display:block;margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">
+                    Select Team to Scout
+                </label>
+                <select id="scout-team-select" style="width:100%;max-width:280px" onchange="loadTeamSignatures()">
+                    <option value="">Choose a team...</option>
                 </select>
             </div>
         </div>
-        
-        <h2 id="scout-team-name" style="margin-bottom:1.5rem; font-weight:700; display:none;">Team Analysis</h2>
-        
-        <div id="scout-content" class="scout-grid" style="display:none;">
-            <!-- Left: Pairings (Node Graph) -->
-            <div class="scout-column">
-                <div class="scout-header">Preferred Pairings Network</div>
-                <!-- NEW: Graph Container -->
-                <div id="pairings-graph" class="graph-container">
-                    <!-- SVG and Nodes injected via JS -->
-                </div>
-                <div style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:5px;">
-                    Hover nodes to highlight connections. Line thickness = pairing frequency.
-                </div>
+        <h2 id="scout-team-name" style="margin-bottom:1.25rem;font-weight:800;display:none;font-size:1.3rem"></h2>
+        <div id="scout-content" class="scout-grid" style="display:none">
+            <div class="scout-column card">
+                <div class="section-header">Preferred Pairings Network</div>
+                <div id="pairings-graph" class="graph-container"></div>
+                <div style="font-size:0.65rem;color:var(--text-muted);text-align:center;margin-top:4px">Hover nodes to highlight connections</div>
             </div>
-
-            <!-- Right: Phases -->
-            <div class="scout-column">
+            <div class="scout-column card">
                 <div class="scout-subsection">
-                    <div class="scout-header" style="color:var(--accent-green)">Phase 1 Priority Picks</div>
-                    <div id="scout-p1" class="priority-list">
-                        <!-- Populated by JS -->
-                    </div>
+                    <div class="section-header" style="color:var(--accent-green)">Phase 1 Priority Picks</div>
+                    <div id="scout-p1" class="priority-list"></div>
                 </div>
-                
                 <div class="scout-subsection">
-                    <div class="scout-header" style="color:var(--accent-blue)">Phase 2 Priority Picks</div>
-                    <div id="scout-p2" class="priority-list">
-                        <!-- Populated by JS -->
-                    </div>
+                    <div class="section-header" style="color:var(--accent-blue)">Phase 2 Priority Picks</div>
+                    <div id="scout-p2" class="priority-list"></div>
                 </div>
             </div>
         </div>
-        
-        <div id="scout-placeholder" class="loading">Select a team to view analysis.</div>
+        <div id="scout-placeholder" class="loading">Select a team to view their signature analysis.</div>
     </section>
 
-    <!-- STATS SECTION -->
+    <!-- ========== GLOBAL META ========== -->
+    <section id="meta" class="section">
+        <div class="meta-grid">
+            <div class="meta-column card">
+                <div class="section-header">Top Meta Picks</div>
+                <div id="meta-picks-list" class="loading">Loading...</div>
+            </div>
+            <div class="meta-column card">
+                <div class="section-header" style="color:var(--accent-red)">Highest Ban Rate</div>
+                <div id="meta-bans-list" class="loading">Loading...</div>
+            </div>
+        </div>
+        <div style="margin-top:1.5rem">
+            <div class="card" style="padding:1.25rem">
+                <div class="section-header">Highest Win Rates (Min 5 Games)</div>
+                <div id="meta-wr-list" class="loading">Loading...</div>
+            </div>
+        </div>
+        <div style="margin-top:1.5rem">
+            <div class="card" style="padding:1.25rem">
+                <div class="section-header" style="color:var(--accent-purple)">Archetype Performance</div>
+                <div id="meta-arch-list" class="loading">Loading...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== TOURNAMENT STATS ========== -->
     <section id="stats" class="section">
-        <div class="filters">
+        <div class="filters card">
             <div class="filter-group">
                 <label>Tournament</label>
-                <select id="stats-tournament" onchange="loadStatsTable()"></select>
+                <select id="stats-tournament" onchange="onStatsTournamentChange()"></select>
+            </div>
+            <div class="filter-group">
+                <label>Team</label>
+                <select id="stats-team" onchange="loadStatsTable()">
+                    <option value="All">All Teams</option>
+                </select>
             </div>
             <div class="filter-group">
                 <label>Map</label>
@@ -921,7 +1503,7 @@
                     <option value="Red">Red Side</option>
                 </select>
             </div>
-             <div class="filter-group">
+            <div class="filter-group">
                 <label>Sort By</label>
                 <select id="stats-sort" onchange="loadStatsTable()">
                     <option value="Total Picks">Total Picks</option>
@@ -933,17 +1515,16 @@
                 </select>
             </div>
         </div>
-
-        <div class="table-container">
+        <div class="table-wrap card">
             <table id="stats-table">
                 <thead>
                     <tr>
                         <th>Hero</th>
-                        <th style="text-align:center">Pick P1</th>
-                        <th style="text-align:center">Pick P2</th>
+                        <th style="text-align:center">P1</th>
+                        <th style="text-align:center">P2</th>
                         <th style="text-align:center">Ban P1</th>
                         <th style="text-align:center">Ban P2</th>
-                        <th style="text-align:center">Total Picks</th>
+                        <th style="text-align:center">Total</th>
                         <th style="text-align:center">Win Rate</th>
                     </tr>
                 </thead>
@@ -954,18 +1535,27 @@
         </div>
     </section>
 
-    <!-- DATABASE SECTION -->
+    <!-- ========== MATCH HISTORY ========== -->
     <section id="database" class="section">
-        <div class="filters">
-            <select id="match-tournament" onchange="renderMatches()">
-                <option value="All">All Tournaments</option>
-            </select>
-            <select id="match-map" onchange="renderMatches()">
-                <option value="All">All Maps</option>
-            </select>
-            <select id="match-team" onchange="renderMatches()">
-                <option value="All">All Teams</option>
-            </select>
+        <div class="filters card">
+            <div class="filter-group">
+                <label>Tournament</label>
+                <select id="match-tournament" onchange="renderMatches()">
+                    <option value="All">All Tournaments</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Map</label>
+                <select id="match-map" onchange="renderMatches()">
+                    <option value="All">All Maps</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Team</label>
+                <select id="match-team" onchange="renderMatches()">
+                    <option value="All">All Teams</option>
+                </select>
+            </div>
         </div>
         <div id="match-list" class="match-grid">
             <div class="loading">Loading matches...</div>
@@ -973,45 +1563,39 @@
     </section>
 </main>
 
-<!-- HERO SELECTION MODAL -->
+<!-- ========== HERO SELECTION MODAL ========== -->
 <div class="modal-overlay" id="hero-modal">
-    <div class="modal">
+    <div class="modal card">
         <div class="modal-header">
             <h3>Select a Hero</h3>
             <button class="remove-btn" onclick="closeModal()">
-                <svg class="icon-svg" viewBox="0 0 24 24">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                <svg class="icon-svg" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
-        <input type="text" class="modal-search" id="hero-search" placeholder="Search hero name..." onkeyup="filterHeroes()">
+        <input type="text" class="modal-search" id="hero-search" placeholder="Search hero name..." oninput="filterHeroes()">
         <div class="hero-grid" id="hero-grid"></div>
     </div>
 </div>
 
-<!-- HERO RELATIONS MODAL -->
+<!-- ========== HERO RELATIONS MODAL ========== -->
 <div class="modal-overlay" id="relations-modal">
-    <div class="modal">
+    <div class="modal card">
         <div class="modal-header">
-            <h3 id="rel-hero-name">Hero Name</h3>
+            <h3 id="rel-hero-name">Hero</h3>
             <button class="remove-btn" onclick="closeRelationsModal()">
-                <svg class="icon-svg" viewBox="0 0 24 24">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                <svg class="icon-svg" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
         <div class="relations-content">
             <div class="relation-col">
                 <h4>Best Synergy (Win Rate)</h4>
-                <div id="rel-synergy-list" class="relation-list">
+                <div id="rel-syn-list" class="relation-list">
                     <div class="loading">Loading...</div>
                 </div>
             </div>
             <div class="relation-col">
-                <h4 style="color: var(--accent-red); border-color: var(--accent-red);">Strong Counters</h4>
-                <div id="rel-counter-list" class="relation-list">
+                <h4 style="color:var(--accent-red);border-color:rgba(239,68,68,0.2)">Strong Counters</h4>
+                <div id="rel-cnt-list" class="relation-list">
                     <div class="loading">Loading...</div>
                 </div>
             </div>
@@ -1019,988 +1603,1127 @@
     </div>
 </div>
 
-<!-- UPDATED: BAN SUGGESTIONS MODAL -->
+<!-- ========== BAN SUGGESTIONS MODAL ========== -->
 <div class="modal-overlay" id="ban-modal">
-    <div class="ban-modal-container">
+    <div class="ban-modal-box card">
         <div class="modal-header">
-            <h3>Team Analysis</h3>
+            <h3>Ban Target Analysis</h3>
             <button class="remove-btn" onclick="closeBanModal()">
-                <svg class="icon-svg" viewBox="0 0 24 24">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                <svg class="icon-svg" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
-        <div class="ban-split-view">
-            <!-- Blue Team Threats -->
+        <div class="ban-split">
             <div class="ban-side">
-                <div class="ban-side-header blue-header">
-                    <h3>Blue Team Threats</h3>
-                </div>
-                <div class="ban-list-container" id="ban-list-blue">
-                    <div class="loading">Analyzing...</div>
-                </div>
+                <div class="ban-side-header"><h3 class="blue-text">Blue Team Threats</h3></div>
+                <div class="ban-list-scroll" id="ban-list-blue"><div class="loading">Analyzing...</div></div>
             </div>
-            <!-- Red Team Threats -->
             <div class="ban-side">
-                <div class="ban-side-header red-header">
-                    <h3>Red Team Threats</h3>
-                </div>
-                <div class="ban-list-container" id="ban-list-red">
-                    <div class="loading">Analyzing...</div>
-                </div>
+                <div class="ban-side-header"><h3 class="red-text">Red Team Threats</h3></div>
+                <div class="ban-list-scroll" id="ban-list-red"><div class="loading">Analyzing...</div></div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const API_BASE = '/api';
+// ==========================================
+// CONFIG & STATE
+// ==========================================
+const API = '/api';
+const esc = s => s
+    ? String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+    : '';
+const heroImg = name => `/static/hero_icon/${encodeURIComponent(name)}.png`;
+const heroImgTag = (name, cls = '', size = '') =>
+    `<img src="${heroImg(name)}" class="${cls}" style="${size}" onerror="this.style.display='none'">`;
 
-    let state = {
-        heroData: {},      
-        matches: [],       
-        filters: {},       
-        blueTeam: [],
-        redTeam: [],
-        currentModalSide: null,
-        isApiConnected: false
+const state = {
+    heroes: {},
+    matches: [],
+    filters: {},
+    blue: [],
+    red: [],
+    modalSide: null,
+    connected: false
+};
+
+// ==========================================
+// TOAST NOTIFICATIONS
+// ==========================================
+function toast(msg, type = 'ok') {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => {
+        el.classList.add('out');
+        setTimeout(() => el.remove(), 300);
+    }, 4000);
+}
+
+// ==========================================
+// INITIALIZATION
+// ==========================================
+window.addEventListener('DOMContentLoaded', async () => {
+    await checkStatus();
+    if (!state.connected) return;
+    await Promise.all([loadHeroes(), loadMatches(), loadFilters()]);
+    renderTeams();
+    populateScoutFilter();
+});
+
+async function checkStatus() {
+    try {
+        const res = await fetch(`${API}/status`);
+        if (!res.ok) throw new Error();
+        const s = await res.json();
+        state.connected = true;
+
+        if (s.status === 'warning') {
+            const errs = (s.load_errors || []).join('; ');
+            if (s.match_count === 0) toast('No match data loaded. Ensure Analyst.xlsx has the correct sheet.', 'warn');
+            else if (s.hero_data_count === 0) toast('Hero stats missing. Check Hero Data sheet.', 'warn');
+            else if (errs) toast(errs, 'warn');
+        }
+        if (s.match_count > 0) toast(`Loaded ${s.match_count} matches, ${s.hero_data_count} heroes.`, 'ok');
+    } catch (e) {
+        document.querySelector('main').innerHTML = `
+            <div class="error-msg">
+                Cannot connect to the backend server.<br><br>
+                Please run <code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px">python flask_app.py</code> in the terminal, then refresh this page.
+            </div>`;
+    }
+}
+
+function switchTab(id) {
+    document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+    if (id === 'stats' && state.connected) loadStatsTable();
+    if (id === 'meta' && state.connected) loadGlobalMeta();
+}
+
+// ==========================================
+// DATA FETCHING
+// ==========================================
+async function loadHeroes() {
+    const r = await fetch(`${API}/heroes`);
+    state.heroes = await r.json();
+    initHeroGrid();
+}
+
+async function loadMatches() {
+    const r = await fetch(`${API}/matches`);
+    state.matches = await r.json();
+    populateMatchFilters();
+    renderMatches();
+}
+
+async function loadFilters() {
+    const r = await fetch(`${API}/filters?tournament=All`);
+    state.filters = await r.json();
+    populateStatsFilters();
+}
+
+// ==========================================
+// DRAFT ANALYSIS
+// ==========================================
+let analyzeTimer = null;
+function debouncedAnalyze() {
+    clearTimeout(analyzeTimer);
+    analyzeTimer = setTimeout(fetchAnalysis, 120);
+}
+
+async function fetchAnalysis() {
+    const tbody = document.getElementById('comp-tbody');
+    const sugBox = document.getElementById('suggestion-box');
+    const archSec = document.getElementById('archetype-section');
+
+    // Reset UI
+    ['blue', 'red'].forEach(s => {
+        document.getElementById(`${s}-wr-display`).style.display = 'none';
+        document.getElementById(`${s}-strat-block`).style.display = 'none';
+    });
+    sugBox.style.display = 'none';
+    archSec.style.display = 'none';
+
+    const canvas = document.getElementById('comp-radar');
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+
+    if (state.blue.length === 0 && state.red.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Select heroes to compare</td></tr>';
+        return;
+    }
+
+    const isFull = state.blue.length === 5 && state.red.length === 5;
+
+    try {
+        const [rA, rC] = await Promise.all([
+            fetch(`${API}/analyze`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ blue_team: state.blue, red_team: state.red })
+            }),
+            fetch(`${API}/analyze-comp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ blue_team: state.blue, red_team: state.red })
+            })
+        ]);
+
+        const dA = await rA.json().catch(() => null);
+        const dC = await rC.json().catch(() => null);
+
+        if (dA) {
+            setWR('blue', dA.blue_prob);
+            setWR('red', dA.red_prob);
+            renderCompTable(dA.stats_table);
+
+            if (!isFull && dA.suggestion && dA.suggestion.reason) {
+                const s = dA.suggestion;
+                const cls = s.team === 'Blue' ? 'blue-text' : 'red-text';
+                document.getElementById('suggestion-text').innerHTML = `<span class="${cls}" style="font-weight:800">${s.team}:</span> ${esc(s.reason)}`;
+                sugBox.style.display = 'block';
+            }
+        }
+
+        if (dC) {
+            drawRadar(canvas.getContext('2d'), dC.blue_stats, dC.red_stats);
+            renderArchetypeBars(dC.blue_potentials, dC.red_potentials);
+
+            if (isFull) {
+                renderStrategies(dC.blue_strategy, dC.red_strategy);
+            }
+        }
+    } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="4" class="error-msg">Analysis request failed</td></tr>';
+    }
+}
+
+function setWR(side, prob) {
+    document.getElementById(`${side}-wr-display`).style.display = 'block';
+    document.getElementById(`${side}-wr-val`).textContent = prob.toFixed(1) + '%';
+}
+
+function renderCompTable(rows) {
+    const tbody = document.getElementById('comp-tbody');
+    if (!rows || !rows.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">No data</td></tr>';
+        return;
+    }
+    const maxVal = Math.max(...rows.flatMap(r => [r.blue_val, r.red_val]), 1);
+    tbody.innerHTML = rows.map(r => {
+        const cls = r.leader === 'blue' ? 'diff-pos' : r.leader === 'red' ? 'diff-neg' : '';
+        const bW = (r.blue_val / maxVal * 100).toFixed(0);
+        const rW = (r.red_val / maxVal * 100).toFixed(0);
+        return `
+            <tr>
+                <td class="stat-name" style="font-weight:600">${r.stat}</td>
+                <td class="stat-val-cell">${r.blue_val}<div class="stat-mini-bar" style="width:${bW}%;background:var(--accent-blue)"></div></td>
+                <td class="stat-val-cell">${r.red_val}<div class="stat-mini-bar" style="width:${rW}%;background:var(--accent-red)"></div></td>
+                <td class="${cls}">${r.diff > 0 ? '+' : ''}${r.diff}</td>
+            </tr>`;
+    }).join('');
+}
+
+function renderArchetypeBars(bPot, rPot) {
+    const sec = document.getElementById('archetype-section');
+    const keys = ['Split Push', 'Team Fight', 'Pick Off'];
+    const short = { 'Split Push': 'SPLIT', 'Team Fight': 'TEAMFIGHT', 'Pick Off': 'PICK OFF' };
+    const maxV = Math.max(...keys.map(k => Math.max(bPot[k] || 0, rPot[k] || 0)), 1);
+
+    sec.innerHTML = keys.map(k => {
+        const b = bPot[k] || 0;
+        const r = rPot[k] || 0;
+        return `
+            <div class="archetype-row">
+                <span class="archetype-label">${short[k]}</span>
+                <div class="archetype-bars">
+                    <div class="archetype-bar-track"><div class="archetype-bar-fill fill-blue" style="width:${(b / maxV * 100).toFixed(0)}%"></div></div>
+                    <div class="archetype-bar-track"><div class="archetype-bar-fill fill-red" style="width:${(r / maxV * 100).toFixed(0)}%"></div></div>
+                </div>
+                <span style="width:65px;text-align:right;font-size:0.68rem;color:var(--text-muted)">
+                    <span class="blue-text">${b.toFixed(1)}</span> / <span class="red-text">${r.toFixed(1)}</span>
+                </span>
+            </div>`;
+    }).join('');
+    sec.style.display = 'block';
+}
+
+function renderStrategies(blueStrat, redStrat) {
+    document.getElementById('blue-strat-text').textContent = blueStrat || 'Analyzing...';
+    document.getElementById('blue-strat-block').style.display = 'block';
+    document.getElementById('red-strat-text').textContent = redStrat || 'Analyzing...';
+    document.getElementById('red-strat-block').style.display = 'block';
+}
+
+// ==========================================
+// RADAR CHART
+// ==========================================
+function drawRadar(ctx, dBlue, dRed) {
+    const W = ctx.canvas.width;
+    const H = ctx.canvas.height;
+    const cx = W / 2;
+    const cy = H / 2;
+    const R = 125;
+    const stats = ['Durability', 'Offense', 'Crowd Control', 'Mobility', 'Wave Control'];
+    const labels = ['DUR', 'OFF', 'CC', 'MOB', 'WAVE'];
+    const n = stats.length;
+    const step = Math.PI * 2 / n;
+
+    ctx.clearRect(0, 0, W, H);
+    const v = (obj, k) => obj ? (obj[k] || 0) : 0;
+
+    // Grid lines
+    for (let i = 0; i < n; i++) {
+        const a = i * step - Math.PI / 2;
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+        ctx.lineWidth = 1;
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R);
+        ctx.stroke();
+    }
+
+    // Grid rings
+    for (let s = 0.25; s <= 1; s += 0.25) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+        for (let i = 0; i <= n; i++) {
+            const a = (i % n) * step - Math.PI / 2;
+            const x = cx + Math.cos(a) * R * s;
+            const y = cy + Math.sin(a) * R * s;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    // Draw shape
+    const shape = (data, stroke, fill) => {
+        ctx.beginPath();
+        for (let i = 0; i < n; i++) {
+            const val = v(data, stats[i]);
+            const r = Math.min(val / 50, 1) * R;
+            const a = i * step - Math.PI / 2;
+            i === 0
+                ? ctx.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r)
+                : ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        if (fill) {
+            ctx.fillStyle = fill;
+            ctx.fill();
+        }
+
+        // Dots
+        for (let i = 0; i < n; i++) {
+            const val = v(data, stats[i]);
+            const r = Math.min(val / 50, 1) * R;
+            const a = i * step - Math.PI / 2;
+            ctx.beginPath();
+            ctx.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 3, 0, Math.PI * 2);
+            ctx.fillStyle = stroke;
+            ctx.fill();
+        }
     };
 
-    window.addEventListener('DOMContentLoaded', async () => {
-        await checkConnection();
-        if (state.isApiConnected) {
-            await Promise.all([loadHeroData(), loadMatches(), loadFilters()]);
-            renderTeams(); 
-            populateScoutFilter();
-        }
+    shape(dBlue, '#3b82f6', 'rgba(59,130,246,0.3)');
+    shape(dRed, '#ef4444', 'rgba(239,68,68,0.3)');
+
+    // Labels
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    labels.forEach((lbl, i) => {
+        const a = i * step - Math.PI / 2;
+        ctx.fillText(lbl, cx + Math.cos(a) * (R + 22), cy + Math.sin(a) * (R + 22));
+    });
+}
+
+// ==========================================
+// TEAM SCOUTING
+// ==========================================
+function populateScoutFilter() {
+    const sel = document.getElementById('scout-team-select');
+    sel.innerHTML = '<option value="">Choose a team...</option>';
+    (state.filters.teams || []).forEach(t => {
+        if (t === 'All') return;
+        const o = document.createElement('option');
+        o.value = t;
+        o.innerText = t;
+        sel.appendChild(o);
+    });
+}
+
+async function loadTeamSignatures() {
+    const name = document.getElementById('scout-team-select').value;
+    const ph = document.getElementById('scout-placeholder');
+    const ct = document.getElementById('scout-content');
+    const tt = document.getElementById('scout-team-name');
+
+    if (!name) {
+        tt.style.display = 'none';
+        ct.style.display = 'none';
+        ph.style.display = 'block';
+        return;
+    }
+
+    tt.style.display = 'block';
+    ct.style.display = 'grid';
+    ph.style.display = 'none';
+    tt.innerText = name + ' Analysis';
+    document.getElementById('pairings-graph').innerHTML = '<div class="loading">Loading graph...</div>';
+    document.getElementById('scout-p1').innerHTML = '';
+    document.getElementById('scout-p2').innerHTML = '';
+
+    try {
+        const r = await fetch(`${API}/team-signatures/${encodeURIComponent(name)}`);
+        const d = await r.json();
+        renderPairingsGraph(d.pairings);
+
+        const renderP = (el, items) => {
+            if (!items || !items.length) {
+                el.innerHTML = '<div style="color:var(--text-muted);font-size:0.78rem">No data.</div>';
+                return;
+            }
+            el.innerHTML = items.map(p => `
+                <div class="priority-item">
+                    <div class="priority-name">
+                        ${heroImgTag(p.hero, '', 'width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid var(--border)')}
+                        ${esc(p.hero)}
+                    </div>
+                    <div class="priority-stats">
+                        WR: <span style="color:${p.win_rate > 50 ? 'var(--accent-green)' : 'var(--accent-red)'};font-weight:700">${p.win_rate}%</span> &middot; ${p.count}P
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        renderP(document.getElementById('scout-p1'), d.priority_p1);
+        renderP(document.getElementById('scout-p2'), d.priority_p2);
+    } catch (e) {
+        document.getElementById('pairings-graph').innerHTML = '<div class="error-msg">Failed to load team data.</div>';
+    }
+}
+
+function renderPairingsGraph(pairings) {
+    const ct = document.getElementById('pairings-graph');
+    ct.innerHTML = '';
+
+    if (!pairings || !pairings.length) {
+        ct.innerHTML = '<div style="color:var(--text-muted);display:flex;align-items:center;justify-content:center;height:100%">No pairings found.</div>';
+        return;
+    }
+
+    const heroes = new Set();
+    pairings.forEach(p => {
+        heroes.add(p.heroes[0]);
+        heroes.add(p.heroes[1]);
+    });
+    const nodes = Array.from(heroes);
+    const w = ct.offsetWidth || 400;
+    const h = ct.offsetHeight || 560;
+    const cx = w / 2;
+    const cy = h / 2;
+    const r = Math.min(w, h) / 2 - 55;
+    const pos = {};
+
+    nodes.forEach((n, i) => {
+        const a = (i / nodes.length) * 2 * Math.PI - Math.PI / 2;
+        pos[n] = { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
     });
 
-    async function checkConnection() {
-        try {
-            const res = await fetch(`${API_BASE}/heroes`);
-            if (res.ok) {
-                state.isApiConnected = true;
-            } else {
-                throw new Error('API Error');
-            }
-        } catch (e) {
-            document.querySelector('main').innerHTML = 
-                `<div class="error">Cannot connect to Backend.<br>Please run <code>python flask_app.py</code> in the terminal.</div>`;
-        }
-    }
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'graph-svg');
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '100%');
+    const maxC = Math.max(...pairings.map(p => p.count), 1);
 
-    function switchTab(tabId) {
-        document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
+    pairings.forEach(p => {
+        const [h1, h2] = p.heroes;
+        const p1 = pos[h1], p2 = pos[h2];
+        if (!p1 || !p2) return;
 
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            if (btn.getAttribute('data-tab') === tabId) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
+        const line = document.createElementNS(NS, 'line');
+        line.setAttribute('x1', p1.x);
+        line.setAttribute('y1', p1.y);
+        line.setAttribute('x2', p2.x);
+        line.setAttribute('y2', p2.y);
+        line.setAttribute('class', 'graph-edge');
+        line.setAttribute('stroke-width', 1 + (p.count / maxC) * 3);
+
+        line.addEventListener('mouseenter', () => {
+            document.querySelectorAll(`[data-hero="${h1}"],[data-hero="${h2}"]`).forEach(el => el.style.borderColor = '#fff');
+            line.style.opacity = 1;
         });
-        
-        if (tabId === 'stats') loadStatsTable();
-    }
-
-    // --- DATA FETCHING ---
-
-    async function loadHeroData() {
-        const res = await fetch(`${API_BASE}/heroes`);
-        state.heroData = await res.json();
-        initHeroGrid();
-    }
-
-    async function loadMatches() {
-        const res = await fetch(`${API_BASE}/matches`);
-        state.matches = await res.json();
-        populateMatchFilters();
-        renderMatches();
-    }
-
-    async function loadFilters() {
-        const res = await fetch(`${API_BASE}/filters?tournament=All`);
-        state.filters = await res.json();
-        populateStatsFilters();
-    }
-
-    // --- UPDATED: TEAM SCOUTING LOGIC ---
-
-    function populateScoutFilter() {
-        const select = document.getElementById('scout-team-select');
-        select.innerHTML = '<option value="">Select Team...</option>';
-        const teams = state.filters.teams || [];
-        teams.forEach(t => {
-            if(t !== 'All') {
-                const opt = document.createElement('option');
-                opt.value = t; opt.innerText = t;
-                select.appendChild(opt);
-            }
+        line.addEventListener('mouseleave', () => {
+            document.querySelectorAll(`[data-hero="${h1}"],[data-hero="${h2}"]`).forEach(el => el.style.borderColor = '');
+            line.style.opacity = '';
         });
-    }
+        svg.appendChild(line);
+    });
+    ct.appendChild(svg);
 
-    // --- NEW: NODE GRAPH RENDERER ---
-    function renderPairingsGraph(pairings) {
-        const container = document.getElementById('pairings-graph');
-        container.innerHTML = ''; // Clear previous
+    nodes.forEach(hero => {
+        const p = pos[hero];
+        const nd = document.createElement('div');
+        nd.className = 'graph-node';
+        nd.style.left = p.x + 'px';
+        nd.style.top = p.y + 'px';
+        nd.dataset.hero = hero;
+        nd.innerHTML = `${heroImgTag(hero, '', 'width:100%;height:100%;border-radius:50%;object-fit:cover')}<div class="graph-node-label">${esc(hero)}</div>`;
 
-        if (!pairings || pairings.length === 0) {
-            container.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem; display:flex; align-items:center; justify-content:center; height:100%;">No pairings found.</div>';
-            return;
-        }
-
-        // 1. Extract unique nodes
-        const uniqueHeroes = new Set();
-        pairings.forEach(p => {
-            uniqueHeroes.add(p.heroes[0]);
-            uniqueHeroes.add(p.heroes[1]);
-        });
-        const nodes = Array.from(uniqueHeroes);
-
-        // 2. Calculate Positions (Circular Layout)
-        const width = container.offsetWidth;
-        const height = container.offsetHeight;
-        const centerX = width / 2;
-        const centerY = height / 2;
-        const radius = Math.min(width, height) / 2 - 40; // Padding
-
-        const positions = {};
-        nodes.forEach((node, index) => {
-            const angle = (index / nodes.length) * 2 * Math.PI - (Math.PI / 2); // Start from top
-            positions[node] = {
-                x: centerX + radius * Math.cos(angle),
-                y: centerY + radius * Math.sin(angle)
-            };
-        });
-
-        // 3. Create SVG Element for Edges
-        const svgNS = "http://www.w3.org/2000/svg";
-        const svg = document.createElementNS(svgNS, "svg");
-        svg.setAttribute("class", "graph-svg");
-        svg.setAttribute("width", "100%");
-        svg.setAttribute("height", "100%");
-        
-        // 4. Draw Edges
-        // Normalize stroke width based on count
-        const maxCount = Math.max(...pairings.map(p => p.count));
-
-        pairings.forEach(p => {
-            const [h1, h2] = p.heroes;
-            const pos1 = positions[h1];
-            const pos2 = positions[h2];
-
-            if (pos1 && pos2) {
-                const line = document.createElementNS(svgNS, "line");
-                line.setAttribute("x1", pos1.x);
-                line.setAttribute("y1", pos1.y);
-                line.setAttribute("x2", pos2.x);
-                line.setAttribute("y2", pos2.y);
-                line.setAttribute("class", "graph-edge");
-                
-                // Dynamic stroke width: min 1px, max 4px
-                const width = 1 + (p.count / maxCount) * 3;
-                line.setAttribute("stroke-width", width);
-
-                // Interaction: Hover Edge -> Highlight Nodes
-                line.addEventListener('mouseenter', () => {
-                    document.querySelectorAll(`[data-hero="${h1}"]`).forEach(el => el.style.border = "2px solid #fff");
-                    document.querySelectorAll(`[data-hero="${h2}"]`).forEach(el => el.style.border = "2px solid #fff");
-                    line.style.opacity = 1;
-                });
-                line.addEventListener('mouseleave', () => {
-                    document.querySelectorAll(`[data-hero="${h1}"]`).forEach(el => el.style.border = "");
-                    document.querySelectorAll(`[data-hero="${h2}"]`).forEach(el => el.style.border = "");
-                    line.style.opacity = "";
-                });
-
-                svg.appendChild(line);
-            }
-        });
-
-        container.appendChild(svg);
-
-        // 5. Draw Nodes
-        nodes.forEach(hero => {
-            const pos = positions[hero];
-            const node = document.createElement("div");
-            node.className = "graph-node";
-            node.style.left = `${pos.x}px`;
-            node.style.top = `${pos.y}px`;
-            node.dataset.hero = hero; // For edge interaction
-
-            const imgPath = `/static/hero_icon/${encodeURIComponent(hero)}.png`;
-            node.innerHTML = `
-                <img src="${imgPath}" onerror="this.src='https://via.placeholder.com/50/1e293b/FFF?text=${hero.charAt(0)}'">
-                <div class="graph-node-label">${hero}</div>
-            `;
-
-            // Interaction: Hover Node -> Highlight Edges
-            node.addEventListener('mouseenter', () => {
-                // Find edges connected to this hero
-                Array.from(svg.children).forEach(line => {
-                    // We need to check if the line connects to this node's position (approximate check or rely on logic)
-                    // Simpler: Re-iterate pairings to find lines
-                    const connected = pairings.find(p => p.heroes.includes(hero));
-                    // This is tricky with SVG lines directly. 
-                    // Better approach: We have the positions, but we didn't store the line element reference.
-                    // Let's use a class toggle approach on the SVG lines if we had IDs. 
-                    // Instead, let's just opacity ALL lines and make connected ones opaque.
-                });
-                
-                // Highlight Logic
-                Array.from(svg.children).forEach(line => {
-                    const x1 = parseFloat(line.getAttribute("x1"));
-                    const y1 = parseFloat(line.getAttribute("y1"));
-                    const x2 = parseFloat(line.getAttribute("x2"));
-                    const y2 = parseFloat(line.getAttribute("y2"));
-                    
-                    // Check if line touches this node (allow small margin)
-                    const dist1 = Math.hypot(x1 - pos.x, y1 - pos.y);
-                    const dist2 = Math.hypot(x2 - pos.x, y2 - pos.y);
-
-                    if (dist1 < 5 || dist2 < 5) {
-                        line.style.opacity = 1;
-                        line.style.stroke = "#fff";
-                        line.style.strokeWidth = "4px";
-                    } else {
-                        line.style.opacity = 0.1;
-                    }
-                });
-            });
-
-            node.addEventListener('mouseleave', () => {
-                Array.from(svg.children).forEach(line => {
-                    line.style.opacity = "";
-                    line.style.stroke = "";
-                    line.style.strokeWidth = ""; // reset to css
-                });
-            });
-
-            container.appendChild(node);
-        });
-    }
-
-    async function loadTeamSignatures() {
-        const teamName = document.getElementById('scout-team-select').value;
-        const placeholder = document.getElementById('scout-placeholder');
-        const content = document.getElementById('scout-content');
-        const title = document.getElementById('scout-team-name');
-        
-        if (!teamName) {
-            title.style.display = 'none';
-            content.style.display = 'none';
-            placeholder.style.display = 'block';
-            return;
-        }
-
-        title.style.display = 'block';
-        content.style.display = 'grid';
-        placeholder.style.display = 'none';
-        title.innerText = `${teamName} Analysis`;
-
-        // Clear previous
-        document.getElementById('pairings-graph').innerHTML = '<div class="loading">Loading Graph...</div>';
-        document.getElementById('scout-p1').innerHTML = '';
-        document.getElementById('scout-p2').innerHTML = '';
-
-        try {
-            const res = await fetch(`${API_BASE}/team-signatures/${encodeURIComponent(teamName)}`);
-            const data = await res.json();
-
-            // 1. Render Graph (Replaces List)
-            renderPairingsGraph(data.pairings);
-
-            // 2. Render Phase 1
-            const p1Container = document.getElementById('scout-p1');
-            if (data.priority_p1 && data.priority_p1.length > 0) {
-                p1Container.innerHTML = data.priority_p1.map(p => {
-                    const img = `/static/hero_icon/${encodeURIComponent(p.hero)}.png`;
-                    return `
-                        <div class="priority-item">
-                            <div class="priority-name">
-                                <img src="${img}" class="pair-hero-icon" style="width:28px;height:28px;" onerror="this.style.display='none'">
-                                ${p.hero}
-                            </div>
-                            <div class="priority-stats">WR: <span style="color:${p.win_rate>50?'var(--accent-green)':'var(--accent-red)'}">${p.win_rate}%</span> | ${p.count} Picks</div>
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                p1Container.innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem;">No data.</div>';
-            }
-
-            // 3. Render Phase 2
-            const p2Container = document.getElementById('scout-p2');
-            if (data.priority_p2 && data.priority_p2.length > 0) {
-                p2Container.innerHTML = data.priority_p2.map(p => {
-                    const img = `/static/hero_icon/${encodeURIComponent(p.hero)}.png`;
-                    return `
-                        <div class="priority-item">
-                            <div class="priority-name">
-                                <img src="${img}" class="pair-hero-icon" style="width:28px;height:28px;" onerror="this.style.display='none'">
-                                ${p.hero}
-                            </div>
-                            <div class="priority-stats">WR: <span style="color:${p.win_rate>50?'var(--accent-green)':'var(--accent-red)'}">${p.win_rate}%</span> | ${p.count} Picks</div>
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                p2Container.innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem;">No data.</div>';
-            }
-
-        } catch(e) {
-            console.error(e);
-            document.getElementById('pairings-graph').innerHTML = '<div class="error">Error loading data.</div>';
-        }
-    }
-
-    // --- UPDATED: BAN MODAL LOGIC ---
-    async function openBanModal() {
-        document.getElementById('ban-modal').style.display = 'flex';
-        
-        const blueList = document.getElementById('ban-list-blue');
-        const redList = document.getElementById('ban-list-red');
-        
-        blueList.innerHTML = '<div class="loading">Analyzing...</div>';
-        redList.innerHTML = '<div class="loading">Analyzing...</div>';
-
-        try {
-            // Analyze for Blue (Protect Blue Team)
-            const resBlue = await fetch(`${API_BASE}/suggest-bans`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ my_team: state.blueTeam, enemy_team: state.redTeam })
-            });
-            const dataBlue = await resBlue.json();
-
-            // Analyze for Red (Protect Red Team)
-            const resRed = await fetch(`${API_BASE}/suggest-bans`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ my_team: state.redTeam, enemy_team: state.blueTeam })
-            });
-            const dataRed = await resRed.json();
-
-            const renderBans = (list, data) => {
-                if(!data.suggestions || data.suggestions.length === 0) {
-                    list.innerHTML = '<div style="padding:1rem; color:var(--text-muted); font-size:0.9rem;">No strong threats detected.</div>';
-                    return;
+        nd.addEventListener('mouseenter', () => {
+            Array.from(svg.children).forEach(ln => {
+                const x1 = +ln.getAttribute('x1'), y1 = +ln.getAttribute('y1');
+                const x2 = +ln.getAttribute('x2'), y2 = +ln.getAttribute('y2');
+                if (Math.hypot(x1 - p.x, y1 - p.y) < 5 || Math.hypot(x2 - p.x, y2 - p.y) < 5) {
+                    ln.style.opacity = 1;
+                    ln.style.stroke = '#fff';
+                    ln.style.strokeWidth = '4px';
+                } else {
+                    ln.style.opacity = '0.08';
                 }
-                list.innerHTML = data.suggestions.map(s => `
-                    <div class="ban-item-improved">
-                        <div class="ban-hero-info">
-                            <img src="/static/hero_icon/${encodeURIComponent(s.name)}.png" 
-                                 class="pair-hero-icon" 
-                                 style="width:48px; height:48px;" 
-                                 onerror="this.style.display='none'">
-                            <span class="ban-hero-name">${s.name}</span>
-                        </div>
-                        <div class="ban-reason-badge">
-                            ${s.reason}
-                        </div>
-                    </div>
-                `).join('');
-            };
-
-            renderBans(blueList, dataBlue);
-            renderBans(redList, dataRed);
-
-        } catch(e) {
-            blueList.innerHTML = '<div class="error">Error</div>';
-            redList.innerHTML = '';
-        }
-    }
-
-    function closeBanModal() {
-        document.getElementById('ban-modal').style.display = 'none';
-    }
-
-    // --- EXISTING LOGIC (STATS & MATCHES) ---
-
-    async function loadStatsTable() {
-        if (!state.isApiConnected) return;
-
-        const tbody = document.getElementById('stats-body');
-        tbody.innerHTML = '<tr><td colspan="7" class="loading">Calculating stats...</td></tr>';
-
-        const tournament = document.getElementById('stats-tournament').value;
-        const map = document.getElementById('stats-map').value;
-        const side = document.getElementById('stats-side').value;
-        const sortBy = document.getElementById('stats-sort').value;
-
-        const url = `${API_BASE}/tournament-stats?tournament=${tournament}&map=${map}&side=${side}&sort=${sortBy}`;
-        
-        try {
-            const res = await fetch(url);
-            const data = await res.json();
-            renderStatsTable(data);
-        } catch (e) {
-            tbody.innerHTML = '<tr><td colspan="7" class="error">Error loading stats</td></tr>';
-        }
-    }
-
-    async function openRelationsModal(heroName) {
-        const modal = document.getElementById('relations-modal');
-        document.getElementById('rel-hero-name').innerText = heroName;
-        modal.style.display = 'flex';
-        
-        const synList = document.getElementById('rel-synergy-list');
-        const cntList = document.getElementById('rel-counter-list');
-        synList.innerHTML = '<div class="loading">Loading...</div>';
-        cntList.innerHTML = '<div class="loading">Loading...</div>';
-
-        try {
-            const res = await fetch(`${API_BASE}/hero-relations/${heroName}`);
-            const data = await res.json();
-
-            synList.innerHTML = '';
-            if(data.synergy.length === 0) synList.innerHTML = '<div style="color:var(--text-muted); font-size:0.85rem;">No synergy data found.</div>';
-            data.synergy.forEach(p => {
-                synList.innerHTML += `
-                    <div class="relation-item">
-                        <div class="rel-name">${p.hero}</div>
-                        <div class="rel-stats">
-                            <span class="wr-good">${p.win_rate.toFixed(1)}%</span> 
-                            (${p.matches} games)
-                        </div>
-                    </div>
-                `;
             });
-
-            cntList.innerHTML = '';
-            if(data.counters.length === 0) cntList.innerHTML = '<div style="color:var(--text-muted); font-size:0.85rem;">No counter data found.</div>';
-            data.counters.forEach(p => {
-                cntList.innerHTML += `
-                    <div class="relation-item">
-                        <div class="rel-name">${p.hero}</div>
-                        <div class="rel-stats">
-                            <span class="wr-good">${p.win_rate.toFixed(1)}%</span> 
-                            vs ${heroName} (${p.matches} games)
-                        </div>
-                    </div>
-                `;
+        });
+        nd.addEventListener('mouseleave', () => {
+            Array.from(svg.children).forEach(ln => {
+                ln.style.opacity = '';
+                ln.style.stroke = '';
+                ln.style.strokeWidth = '';
             });
+        });
+        ct.appendChild(nd);
+    });
+}
 
-        } catch(e) {
-            synList.innerHTML = 'Error loading data.';
-            cntList.innerHTML = '';
-        }
+// ==========================================
+// GLOBAL META
+// ==========================================
+async function loadGlobalMeta() {
+    try {
+        const r = await fetch(`${API}/meta-summary`);
+        if (!r.ok) throw new Error();
+        const d = await r.json();
+        const maxP = Math.max(...d.top_picks.map(h => h.picks), 1);
+        const maxB = Math.max(...d.top_bans.map(h => h.bans), 1);
+
+        document.getElementById('meta-picks-list').innerHTML = d.top_picks.map(h => metaRow(h, h.picks, maxP, 'fill-green', h.picks + ' Picks')).join('');
+        document.getElementById('meta-bans-list').innerHTML = d.top_bans.map(h => metaRow(h, h.bans, maxB, 'fill-red', h.bans + ' Bans')).join('');
+        document.getElementById('meta-wr-list').innerHTML = d.highest_winrate.map(h => `
+            <div class="meta-stat-row" style="border-left:3px solid var(--accent-green)">
+                ${heroImgTag(h.hero, 'meta-stat-img')}
+                <span class="meta-stat-name">${esc(h.hero)}</span>
+                <div class="progress-track"><div class="progress-fill fill-green" style="width:${(h.win_rate / 70 * 100).toFixed(0)}%"></div></div>
+                <div class="meta-stat-vals">
+                    <div class="meta-stat-primary wr-good">${h.win_rate}%</div>
+                    <div class="meta-stat-sub">${h.picks} Games</div>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        ['meta-picks-list', 'meta-bans-list', 'meta-wr-list'].forEach(id => {
+            document.getElementById(id).innerHTML = '<div class="error-msg">Failed to load.</div>';
+        });
     }
 
-    function closeRelationsModal() {
-        document.getElementById('relations-modal').style.display = 'none';
+    try {
+        const r = await fetch(`${API}/meta-archetypes`);
+        if (!r.ok) throw new Error();
+        const d = await r.json();
+        const maxT = Math.max(...d.map(a => a.total), 1);
+
+        document.getElementById('meta-arch-list').innerHTML = d.map(a => `
+            <div class="meta-stat-row" style="border-left:3px solid var(--accent-purple)">
+                <span class="meta-stat-name" style="font-size:0.95rem">${esc(a.archetype)}</span>
+                <div class="progress-track"><div class="progress-fill fill-purple" style="width:${(a.total / maxT * 100).toFixed(0)}%"></div></div>
+                <div class="meta-stat-vals">
+                    <div class="meta-stat-primary" style="color:var(--accent-purple)">${a.win_rate}% WR</div>
+                    <div class="meta-stat-sub">${a.total} Matches</div>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        document.getElementById('meta-arch-list').innerHTML = '<div class="error-msg">Failed to load archetypes. Hero stat data may be missing.</div>';
     }
+}
 
-    async function fetchAnalysis() {
-        const tbody = document.getElementById('comparison-tbody');
-        
-        if (state.blueTeam.length === 0 && state.redTeam.length === 0) {
-            document.getElementById('circle-val-blue').innerText = '50.00%';
-            document.getElementById('circle-val-red').innerText = '50.00%';
-            document.getElementById('circle-prog-blue').style.strokeDashoffset = 157; 
-            document.getElementById('circle-prog-red').style.strokeDashoffset = 157;
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted)">Select heroes to see stats</td></tr>';
-            hideSuggestions();
-            return;
-        }
+function metaRow(h, val, max, fillCls, sub) {
+    return `
+        <div class="meta-stat-row">
+            ${heroImgTag(h.hero, 'meta-stat-img')}
+            <span class="meta-stat-name">${esc(h.hero)}</span>
+            <div class="progress-track"><div class="progress-fill ${fillCls}" style="width:${(val / max * 100).toFixed(0)}%"></div></div>
+            <div class="meta-stat-vals">
+                <div class="meta-stat-primary">${val}</div>
+                <div class="meta-stat-sub">${sub}</div>
+            </div>
+        </div>`;
+}
 
-        try {
-            const res = await fetch(`${API_BASE}/analyze`, {
+// ==========================================
+// BAN MODAL
+// ==========================================
+async function openBanModal() {
+    document.getElementById('ban-modal').style.display = 'flex';
+    const bl = document.getElementById('ban-list-blue');
+    const rl = document.getElementById('ban-list-red');
+    bl.innerHTML = '<div class="loading">Analyzing...</div>';
+    rl.innerHTML = '<div class="loading">Analyzing...</div>';
+
+    try {
+        const [rB, rR] = await Promise.all([
+            fetch(`${API}/suggest-bans`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    blue_team: state.blueTeam,
-                    red_team: state.redTeam
-                })
-            });
-            
-            const data = await res.json();
-            
-            const circumference = 2 * Math.PI * 40; 
-            
-            const bluePerc = data.blue_prob;
-            const blueOffset = circumference - (bluePerc / 100) * circumference;
-            document.getElementById('circle-prog-blue').style.strokeDasharray = `${circumference} ${circumference}`;
-            document.getElementById('circle-prog-blue').style.strokeDashoffset = blueOffset;
-            document.getElementById('circle-val-blue').innerText = bluePerc.toFixed(2) + '%';
+                body: JSON.stringify({ my_team: state.blue, enemy_team: state.red })
+            }),
+            fetch(`${API}/suggest-bans`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ my_team: state.red, enemy_team: state.blue })
+            })
+        ]);
 
-            const redPerc = data.red_prob;
-            const redOffset = circumference - (redPerc / 100) * circumference;
-            document.getElementById('circle-prog-red').style.strokeDasharray = `${circumference} ${circumference}`;
-            document.getElementById('circle-prog-red').style.strokeDashoffset = redOffset;
-            document.getElementById('circle-val-red').innerText = redPerc.toFixed(2) + '%';
-
-            tbody.innerHTML = '';
-            
-            if (data.stats_table && data.stats_table.length > 0) {
-                data.stats_table.forEach(row => {
-                    const diffClass = row.leader === 'blue' ? 'diff-positive' : (row.leader === 'red' ? 'diff-negative' : '');
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="stat-name">${row.stat}</td>
-                        <td>${row.blue_val}</td>
-                        <td>${row.red_val}</td>
-                        <td class="${diffClass}">${row.diff}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+        const render = (el, d) => {
+            if (!d.suggestions || !d.suggestions.length) {
+                el.innerHTML = '<div style="padding:0.75rem;color:var(--text-muted);font-size:0.82rem">No strong threats detected.</div>';
+                return;
             }
+            el.innerHTML = d.suggestions.map(s => `
+                <div class="ban-item">
+                    <div class="ban-hero-info">
+                        ${heroImgTag(s.name, '', 'width:40px;height:40px;border-radius:6px;object-fit:cover')}
+                        <span class="ban-hero-name">${esc(s.name)}</span>
+                    </div>
+                    <div class="ban-reason">${esc(s.reason)}</div>
+                </div>
+            `).join('');
+        };
 
-            hideSuggestions();
-            
-            if (data.suggestion) {
-                const team = data.suggestion.team;
-                const sideId = team === 'Blue' ? 'blue-suggestion' : 'red-suggestion';
-                const textId = team === 'Blue' ? 'blue-suggestion-text' : 'red-suggestion-text';
-                
-                const box = document.getElementById(sideId);
-                const text = document.getElementById(textId);
-                
-                box.style.display = 'block';
-                text.innerText = data.suggestion.reason;
+        render(bl, await rB.json());
+        render(rl, await rR.json());
+    } catch (e) {
+        bl.innerHTML = '<div class="error-msg">Error</div>';
+        rl.innerHTML = '';
+    }
+}
+
+function closeBanModal() {
+    document.getElementById('ban-modal').style.display = 'none';
+}
+
+// ==========================================
+// RELATIONS MODAL
+// ==========================================
+async function openRelationsModal(name) {
+    const m = document.getElementById('relations-modal');
+    document.getElementById('rel-hero-name').textContent = name;
+    m.style.display = 'flex';
+
+    const sl = document.getElementById('rel-syn-list');
+    const cl = document.getElementById('rel-cnt-list');
+    sl.innerHTML = '<div class="loading">Loading...</div>';
+    cl.innerHTML = '<div class="loading">Loading...</div>';
+
+    try {
+        const r = await fetch(`${API}/hero-relations/${encodeURIComponent(name)}`);
+        const d = await r.json();
+
+        const renderItem = (arr, suffix) => {
+            if (!arr.length) {
+                return '<div style="color:var(--text-muted);font-size:0.82rem">No data.</div>';
             }
+            return arr.map(p => `
+                <div class="relation-item">
+                    <div class="rel-name">${esc(p.hero)}</div>
+                    <div class="rel-stats">
+                        <span class="wr-good">${p.win_rate.toFixed(1)}%</span> ${suffix} (${p.matches}g)
+                    </div>
+                </div>
+            `).join('');
+        };
 
-        } catch (e) {
-            console.error(e);
-            tbody.innerHTML = '<tr><td colspan="4" class="error">Analysis failed</td></tr>';
-        }
+        sl.innerHTML = renderItem(d.synergy, 'together');
+        cl.innerHTML = renderItem(d.counters, 'vs ' + esc(name));
+    } catch (e) {
+        sl.innerHTML = 'Error.';
+        cl.innerHTML = '';
+    }
+}
+
+function closeRelationsModal() {
+    document.getElementById('relations-modal').style.display = 'none';
+}
+
+// ==========================================
+// TOURNAMENT STATS
+// ==========================================
+function populateStatsFilters() {
+    const tSel = document.getElementById('stats-tournament');
+    const mSel = document.getElementById('stats-map');
+    const tmSel = document.getElementById('stats-team');
+
+    tSel.innerHTML = '';
+    mSel.innerHTML = '';
+    tmSel.innerHTML = '<option value="All">All Teams</option>';
+
+    (state.filters.tournaments || []).forEach(t => {
+        const o = document.createElement('option');
+        o.value = t;
+        o.innerText = t;
+        tSel.appendChild(o);
+    });
+    (state.filters.maps || []).forEach(m => {
+        const o = document.createElement('option');
+        o.value = m;
+        o.innerText = m;
+        mSel.appendChild(o);
+    });
+    (state.filters.teams || []).forEach(t => {
+        const o = document.createElement('option');
+        o.value = t;
+        o.innerText = t;
+        tmSel.appendChild(o);
+    });
+
+    loadStatsTable();
+}
+
+async function onStatsTournamentChange() {
+    const t = document.getElementById('stats-tournament').value;
+    try {
+        const r = await fetch(`${API}/filters?tournament=${encodeURIComponent(t)}`);
+        const d = await r.json();
+        const tmSel = document.getElementById('stats-team');
+        tmSel.innerHTML = '<option value="All">All Teams</option>';
+        (d.teams || []).forEach(t => {
+            const o = document.createElement('option');
+            o.value = t;
+            o.innerText = t;
+            tmSel.appendChild(o);
+        });
+    } catch (e) { /* ignore */ }
+    loadStatsTable();
+}
+
+async function loadStatsTable() {
+    if (!state.connected) return;
+
+    const tbody = document.getElementById('stats-body');
+    tbody.innerHTML = '<tr><td colspan="7" class="loading">Calculating...</td></tr>';
+
+    const params = new URLSearchParams({
+        tournament: document.getElementById('stats-tournament').value,
+        team: document.getElementById('stats-team').value,
+        map: document.getElementById('stats-map').value,
+        side: document.getElementById('stats-side').value,
+        sort: document.getElementById('stats-sort').value
+    });
+
+    try {
+        const r = await fetch(`${API}/tournament-stats?${params}`);
+        if (!r.ok) throw new Error();
+        renderStatsTable(await r.json());
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="7" class="error-msg">Error loading stats.</td></tr>';
+    }
+}
+
+function renderStatsTable(data) {
+    const tbody = document.getElementById('stats-body');
+    if (!data || !data.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">No data for this filter combination.</td></tr>';
+        return;
     }
 
-    function hideSuggestions() {
-        document.getElementById('blue-suggestion').style.display = 'none';
-        document.getElementById('red-suggestion').style.display = 'none';
-    }
-    
-    function importDraft(match) {
-        const safe = (arr) => arr || [];
-        state.blueTeam = [...safe(match.blue_picks_p1), ...safe(match.blue_picks_p2)];
-        state.redTeam = [...safe(match.red_picks_p1), ...safe(match.red_picks_p2)];
-
-        switchTab('analyzer');
-        renderTeams();
-        fetchAnalysis();
-    }
-
-    function populateStatsFilters() {
-        const tSelect = document.getElementById('stats-tournament');
-        const mSelect = document.getElementById('stats-map');
-        
-        tSelect.innerHTML = '';
-        mSelect.innerHTML = '';
-
-        if (state.filters.tournaments.length > 0) {
-            state.filters.tournaments.forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = t; opt.innerText = t;
-                tSelect.appendChild(opt);
-            });
-            tSelect.selectedIndex = 0; 
-        }
-
-        if (state.filters.maps.length > 0) {
-            state.filters.maps.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m; opt.innerText = m;
-                mSelect.appendChild(opt);
-            });
-            mSelect.selectedIndex = 0; 
-        }
-
-        loadStatsTable();
-    }
-
-    function renderStatsTable(data) {
-        const tbody = document.getElementById('stats-body');
-        tbody.innerHTML = '';
-
-        if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted)">No data available for these filters.</td></tr>';
-            return;
-        }
-
-        data.forEach(row => {
-            const tr = document.createElement('tr');
-            
-            const heroInfo = state.heroData[row.Hero] || { roles: ['Unknown'] };
-            const roleStr = heroInfo.roles.join(', ');
-            const imgPath = `/static/hero_icon/${encodeURIComponent(row['Hero'])}.png`;
-            const wrClass = row['Win Rate'] >= 60 ? 'win-rate-high' : (row['Win Rate'] <= 40 ? 'win-rate-low' : '');
-
-            tr.innerHTML = `
+    tbody.innerHTML = data.map(r => {
+        const roles = state.heroes[r.Hero] ? state.heroes[r.Hero].roles.join(', ') : '';
+        const wrCls = r['Win Rate'] >= 60 ? 'wr-high' : r['Win Rate'] <= 40 ? 'wr-low' : '';
+        return `
+            <tr>
                 <td>
                     <div class="stat-hero-cell">
-                        <img src="${imgPath}" class="stat-hero-img" onerror="this.style.display='none'">
+                        ${heroImgTag(r.Hero, 'stat-hero-img')}
                         <div>
-                            <div style="font-weight:700">${row.Hero}</div>
-                            <div style="font-size:0.75rem; color:var(--text-muted)">${roleStr}</div>
+                            <div style="font-weight:700">${esc(r.Hero)}</div>
+                            ${roles ? `<div style="font-size:0.68rem;color:var(--text-muted)">${esc(roles)}</div>` : ''}
                         </div>
                     </div>
                 </td>
-                <td class="phase-cell">${row['Pick P1']}</td>
-                <td class="phase-cell">${row['Pick P2']}</td>
-                <td class="phase-cell" style="color:var(--accent-red)">${row['Ban P1']}</td>
-                <td class="phase-cell" style="color:var(--accent-red)">${row['Ban P2']}</td>
-                <td class="phase-cell" style="font-weight:bold">${row['Total Picks']}</td>
-                <td class="phase-cell ${wrClass}">${row['Win Rate'].toFixed(1)}%</td>
-            `;
-            tbody.appendChild(tr);
+                <td class="phase-cell">${r['Pick P1']}</td>
+                <td class="phase-cell">${r['Pick P2']}</td>
+                <td class="phase-cell" style="color:var(--accent-red)">${r['Ban P1']}</td>
+                <td class="phase-cell" style="color:var(--accent-red)">${r['Ban P2']}</td>
+                <td class="phase-cell" style="font-weight:800">${r['Total Picks']}</td>
+                <td class="phase-cell ${wrCls}">${r['Win Rate'].toFixed(1)}%</td>
+            </tr>`;
+    }).join('');
+}
+
+// ==========================================
+// MATCH HISTORY
+// ==========================================
+function populateMatchFilters() {
+    const fill = (id, set) => {
+        const el = document.getElementById(id);
+        while (el.options.length > 1) el.remove(1);
+        set.forEach(v => {
+            const o = document.createElement('option');
+            o.value = v;
+            o.innerText = v;
+            el.appendChild(o);
         });
-    }
-
-    function populateMatchFilters() {
-        const tSet = new Set(state.matches.map(m => m.tournament));
-        const mSet = new Set(state.matches.map(m => m.map));
-        const tmSet = new Set(state.matches.flatMap(m => [m.blue_team, m.red_team]));
-
-        const fill = (id, set) => {
-            const el = document.getElementById(id);
-            while(el.options.length > 1) el.remove(1);
-            set.forEach(v => {
-                const opt = document.createElement('option');
-                opt.value = v; opt.innerText = v;
-                el.appendChild(opt);
-            });
-        };
-
-        fill('match-tournament', tSet);
-        fill('match-map', mSet);
-        fill('match-team', tmSet);
-    }
-
-    const renderIcon = (hero, className = '') => {
-        if (!hero) return '';
-        const path = `/static/hero_icon/${encodeURIComponent(hero)}.png`;
-        return `<div class="mini-icon ${className}" title="${hero}"><img src="${path}" onerror="this.style.display='none'; this.parentElement.innerText='${hero.charAt(0)}'"></div>`;
     };
 
-    function toggleMatchBans(card) {
-        card.classList.toggle('active');
-        const bansDiv = card.querySelector('.match-bans');
-        if (bansDiv) {
-            bansDiv.classList.toggle('open');
-        }
+    fill('match-tournament', new Set(state.matches.map(m => m.tournament)));
+    fill('match-map', new Set(state.matches.map(m => m.map)));
+    fill('match-team', new Set(state.matches.flatMap(m => [m.blue_team, m.red_team])));
+}
+
+const miniIcon = (h, cls = '') => {
+    if (!h) return '';
+    return `<div class="mini-icon ${cls}" title="${esc(h)}"><img src="${heroImg(h)}" onerror="this.style.display='none';this.parentElement.textContent='${esc(h.charAt(0))}'"></div>`;
+};
+
+function renderMatches() {
+    const tf = document.getElementById('match-tournament').value;
+    const mf = document.getElementById('match-map').value;
+    const tmf = document.getElementById('match-team').value;
+
+    const filtered = state.matches.filter(m =>
+        (tf === 'All' || m.tournament === tf) &&
+        (mf === 'All' || m.map === mf) &&
+        (tmf === 'All' || m.blue_team === tmf || m.red_team === tmf)
+    );
+
+    const ct = document.getElementById('match-list');
+    if (!filtered.length) {
+        ct.innerHTML = '<div class="loading">No matches found for this filter.</div>';
+        return;
     }
 
-    function renderMatches() {
-        const tFilter = document.getElementById('match-tournament').value;
-        const mFilter = document.getElementById('match-map').value;
-        const tmFilter = document.getElementById('match-team').value;
+    ct.innerHTML = '';
 
-        const filtered = state.matches.filter(m => {
-            return (tFilter === "All" || m.tournament === tFilter) &&
-                   (mFilter === "All" || m.map === mFilter) &&
-                   (tmFilter === "All" || m.blue_team === tmFilter || m.red_team === tmFilter);
+    filtered.forEach(m => {
+        const card = document.createElement('div');
+        card.className = 'match-card';
+
+        const bp = [...(m.blue_picks_p1 || []), ...(m.blue_picks_p2 || [])];
+        const rp = [...(m.red_picks_p1 || []), ...(m.red_picks_p2 || [])];
+
+        card.innerHTML = `
+            <div class="match-top">
+                <span>${esc(m.tournament)} &bull; ${esc(m.map)}</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <button class="btn-import" onclick="event.stopPropagation();importDraft(this.closest('.match-card').dataset)">Import</button>
+                    <span class="chevron"><svg class="icon-svg" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
+                </div>
+            </div>
+            <div class="match-body">
+                <div class="team-row ${m.blue_result === 'WIN' ? 'winner' : 'loser'}">
+                    <span>${esc(m.blue_team)}</span><span>${esc(m.blue_result)}</span>
+                </div>
+                <div class="draft-icons">${bp.map(p => miniIcon(p)).join('')}</div>
+                <div class="divider"></div>
+                <div class="team-row ${m.red_result === 'WIN' ? 'winner' : 'loser'}">
+                    <span>${esc(m.red_team)}</span><span>${esc(m.red_result)}</span>
+                </div>
+                <div class="draft-icons">${rp.map(p => miniIcon(p)).join('')}</div>
+            </div>
+            <div class="match-bans">
+                <div class="ban-section-label">Bans</div>
+                <div class="ban-phase-row">
+                    <span class="ban-phase-label">P1</span>
+                    <div class="ban-side-icons blue-side">${(m.blue_bans_p1 || []).map(b => miniIcon(b, 'ban-b')).join('')}</div>
+                    <span class="ban-center-divider"></span>
+                    <div class="ban-side-icons red-side">${(m.red_bans_p1 || []).map(b => miniIcon(b, 'ban-r')).join('')}</div>
+                </div>
+                <div class="ban-phase-row">
+                    <span class="ban-phase-label">P2</span>
+                    <div class="ban-side-icons blue-side">${(m.blue_bans_p2 || []).map(b => miniIcon(b, 'ban-b')).join('')}</div>
+                    <span class="ban-center-divider"></span>
+                    <div class="ban-side-icons red-side">${(m.red_bans_p2 || []).map(b => miniIcon(b, 'ban-r')).join('')}</div>
+                </div>
+            </div>`;
+
+        card.dataset.blue = JSON.stringify(bp);
+        card.dataset.red = JSON.stringify(rp);
+
+        card.addEventListener('click', e => {
+            if (e.target.closest('.btn-import')) return;
+            card.classList.toggle('open');
+            card.querySelector('.match-bans').classList.toggle('open');
         });
 
-        const container = document.getElementById('match-list');
-        container.innerHTML = '';
+        ct.appendChild(card);
+    });
+}
 
-        if (filtered.length === 0) {
-            container.innerHTML = '<div class="status-msg">No matches found.</div>';
-            return;
+function importDraft(dataset) {
+    try {
+        state.blue = JSON.parse(dataset.blue);
+        state.red = JSON.parse(dataset.red);
+    } catch (e) {
+        toast('Failed to import draft.', 'error');
+        return;
+    }
+    switchTab('analyzer');
+    renderTeams();
+    fetchAnalysis();
+    toast(`Imported ${state.blue.length}v${state.red.length} draft.`, 'ok');
+}
+
+// ==========================================
+// HERO SELECTION MODAL
+// ==========================================
+function initHeroGrid() {
+    const grid = document.getElementById('hero-grid');
+    grid.innerHTML = '';
+
+    Object.keys(state.heroes).forEach(name => {
+        const d = document.createElement('div');
+        d.className = 'grid-item';
+        d.dataset.name = name;
+        const img = state.heroes[name].image;
+
+        if (img) {
+            d.innerHTML = `
+                <img src="${img}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="hero-avatar" style="display:none;width:36px;height:36px">${esc(name.charAt(0))}</div>
+                <span>${esc(name)}</span>`;
+        } else {
+            d.innerHTML = `<div class="hero-avatar" style="width:36px;height:36px">${esc(name.charAt(0))}</div><span>${esc(name)}</span>`;
         }
 
-        filtered.forEach(m => {
+        d.onclick = () => selectHero(name);
+        grid.appendChild(d);
+    });
+}
+
+function openModal(side) {
+    state.modalSide = side;
+    document.getElementById('hero-modal').style.display = 'flex';
+    document.getElementById('hero-search').value = '';
+    filterHeroes();
+    updatePickedUI();
+}
+
+function closeModal() {
+    document.getElementById('hero-modal').style.display = 'none';
+}
+
+function filterHeroes() {
+    const q = document.getElementById('hero-search').value.toLowerCase();
+    document.querySelectorAll('.grid-item').forEach(el => {
+        el.style.display = el.dataset.name.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+
+function updatePickedUI() {
+    const picked = new Set([...state.blue, ...state.red]);
+    document.querySelectorAll('.grid-item').forEach(el => {
+        el.classList.toggle('picked', picked.has(el.dataset.name));
+    });
+}
+
+function selectHero(name) {
+    if (state.blue.includes(name) || state.red.includes(name)) return;
+    const team = state.modalSide === 'blue' ? state.blue : state.red;
+    if (team.length >= 5) return;
+    team.push(name);
+    closeModal();
+    renderTeams();
+    debouncedAnalyze();
+}
+
+function removeHero(side, idx) {
+    (side === 'blue' ? state.blue : state.red).splice(idx, 1);
+    renderTeams();
+    debouncedAnalyze();
+}
+
+// ==========================================
+// TEAM RENDERING
+// ==========================================
+const IC = {
+    info: '<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+    close: '<svg class="icon-svg" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+};
+
+function renderTeams() {
+    const render = (team, side) => {
+        const list = document.getElementById(`${side}-list`);
+        list.innerHTML = '';
+
+        team.forEach((hero, i) => {
             const card = document.createElement('div');
-            card.className = 'match-card';
-            
-            card.onclick = (e) => {
-                if (e.target.closest('.btn-import')) {
-                    e.stopPropagation(); 
-                    importDraft(m);
-                } else {
-                    toggleMatchBans(card);
-                }
-            };
+            card.className = 'hero-card';
+            const img = state.heroes[hero]?.image;
 
-            const blueClass = m.blue_result === 'WIN' ? 'winner' : 'loser';
-            const redClass = m.red_result === 'WIN' ? 'winner' : 'loser';
+            const avatarHtml = img
+                ? `<img src="${img}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="hero-avatar" style="display:none">${esc(hero.charAt(0))}</div>`
+                : `<div class="hero-avatar">${esc(hero.charAt(0))}</div>`;
 
-            const bluePicks = [...(m.blue_picks_p1 || []), ...(m.blue_picks_p2 || [])];
-            const redPicks = [...(m.red_picks_p1 || []), ...(m.red_picks_p2 || [])];
-
-            const blueBans = [...(m.blue_bans_p1 || []), ...(m.blue_bans_p2 || [])];
-            const redBans = [...(m.red_bans_p1 || []), ...(m.red_bans_p2 || [])];
-
-            const chevronSvg = `
-                <svg class="icon-svg" viewBox="0 0 24 24">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>`;
+            const role = state.heroes[hero] ? state.heroes[hero].roles[0] : '';
 
             card.innerHTML = `
-                <div class="match-header">
-                    <span>${m.tournament} • ${m.map}</span>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <button class="btn-import">Import Draft</button>
-                        <span class="chevron">${chevronSvg}</span>
-                    </div>
+                ${avatarHtml}
+                <div class="hero-info">
+                    <h4>${esc(hero)}</h4>
+                    <p>${esc(role)}</p>
                 </div>
-                <div class="match-body">
-                    <div class="team-score ${blueClass}">
-                        <span>${m.blue_team}</span><span>${m.blue_result}</span>
-                    </div>
-                    <div class="draft-preview">
-                        ${bluePicks.map(p => renderIcon(p)).join('')}
-                    </div>
-                    <div style="height:1px; background:rgba(255,255,255,0.1); margin: 0.8rem 0;"></div>
-                    <div class="team-score ${redClass}">
-                        <span>${m.red_team}</span><span>${m.red_result}</span>
-                    </div>
-                    <div class="draft-preview">
-                        ${redPicks.map(p => renderIcon(p)).join('')}
-                    </div>
-                </div>
-                
-                <div class="match-bans">
-                    <div class="phase-label">Bans</div>
-                    <div class="ban-row">
-                        <div class="draft-preview" style="flex:1">
-                            ${blueBans.map(p => renderIcon(p, 'ban-blue')).join('')}
-                        </div>
-                        <div class="draft-preview" style="flex:1; justify-content:flex-end;">
-                            ${redBans.map(p => renderIcon(p, 'ban-red')).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-            container.appendChild(card);
+                <div class="hero-actions">
+                    <button class="info-btn">${IC.info}</button>
+                    <button class="remove-btn">${IC.close}</button>
+                </div>`;
+
+            card.querySelector('.info-btn').addEventListener('click', e => {
+                e.stopPropagation();
+                openRelationsModal(hero);
+            });
+            card.querySelector('.remove-btn').addEventListener('click', e => {
+                e.stopPropagation();
+                removeHero(side, i);
+            });
+
+            list.appendChild(card);
         });
-    }
 
-    // --- Draft Analyzer LOGIC ---
-
-    function initHeroGrid() {
-        const grid = document.getElementById('hero-grid');
-        grid.innerHTML = '';
-        Object.keys(state.heroData).forEach(hero => {
-            const div = document.createElement('div');
-            div.className = 'grid-item';
-            div.dataset.name = hero;
-            const initial = hero.charAt(0);
-            const imgUrl = state.heroData[hero].image || '';
-            
-            div.innerHTML = `
-                ${imgUrl ? `<img src="${imgUrl}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                            <div class="hero-avatar" style="display:none; width:40px; height:40px;">${initial}</div>` 
-                          : `<div class="hero-avatar" style="width:40px; height:40px;">${initial}</div>`}
-                <span>${hero}</span>
-            `;
-            div.onclick = () => selectHero(hero);
-            grid.appendChild(div);
-        });
-    }
-
-    function openModal(side) {
-        state.currentModalSide = side;
-        document.getElementById('hero-modal').style.display = 'flex';
-        document.getElementById('hero-search').value = '';
-        filterHeroes();
-        updatePickedHeroesUI();
-    }
-
-    function closeModal() {
-        document.getElementById('hero-modal').style.display = 'none';
-    }
-
-    function filterHeroes() {
-        const query = document.getElementById('hero-search').value.toLowerCase();
-        const items = document.querySelectorAll('.grid-item');
-        items.forEach(item => {
-            const name = item.dataset.name.toLowerCase();
-            item.style.display = name.includes(query) ? 'block' : 'none';
-        });
-    }
-
-    function updatePickedHeroesUI() {
-        const items = document.querySelectorAll('.grid-item');
-        items.forEach(item => {
-            const name = item.dataset.name;
-            if (state.blueTeam.includes(name) || state.redTeam.includes(name)) {
-                item.classList.add('picked');
-            } else {
-                item.classList.remove('picked');
-            }
-        });
-    }
-
-    function selectHero(heroName) {
-        if (state.blueTeam.includes(heroName) || state.redTeam.includes(heroName)) {
-            return;
-        }
-
-        if (state.currentModalSide === 'blue') {
-            if (state.blueTeam.length < 5) state.blueTeam.push(heroName);
-        } else {
-            if (state.redTeam.length < 5) state.redTeam.push(heroName);
-        }
-        closeModal();
-        renderTeams();
-        fetchAnalysis(); 
-    }
-
-    function removeHero(side, index) {
-        if (side === 'blue') state.blueTeam.splice(index, 1);
-        else state.redTeam.splice(index, 1);
-        renderTeams();
-        fetchAnalysis(); 
-    }
-
-    const icons = {
-        info: `<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`,
-        close: `<svg class="icon-svg" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`
+        document.getElementById(`${side}-count`).textContent = `${team.length}/5`;
+        document.getElementById(`add-${side}-btn`).classList.toggle('hidden', team.length >= 5);
     };
 
-    function renderTeams() {
-        const renderList = (team, side) => {
-            const container = document.getElementById(`${side}-list`);
-            container.innerHTML = '';
-            team.forEach((hero, idx) => {
-                const card = document.createElement('div');
-                card.className = 'hero-card';
-                const initial = hero.charAt(0);
-                const imgUrl = state.heroData[hero]?.image;
-                
-                card.innerHTML = `
-                    ${imgUrl ? `<img src="${imgUrl}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                                <div class="hero-avatar" style="display:none">${initial}</div>` 
-                              : `<div class="hero-avatar">${initial}</div>`}
-                    <div class="hero-info">
-                        <h4>${hero}</h4>
-                        <p>${state.heroData[hero] ? state.heroData[hero].roles[0] : 'Unknown'}</p>
-                    </div>
-                    <div class="hero-actions">
-                        <button class="info-btn" onclick="event.stopPropagation(); openRelationsModal('${hero}')">${icons.info}</button>
-                        <button class="remove-btn" onclick="event.stopPropagation(); removeHero('${side}', ${idx})">${icons.close}</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-            
-            document.getElementById(`${side}-count`).innerText = `${team.length}/5`;
-            
-            const addBtn = document.getElementById(`add-${side}-btn`);
-            if (team.length >= 5) {
-                addBtn.classList.add('hidden');
-            } else {
-                addBtn.classList.remove('hidden');
-            }
-        };
+    render(state.blue, 'blue');
+    render(state.red, 'red');
+}
 
-        renderList(state.blueTeam, 'blue');
-        renderList(state.redTeam, 'red');
+function resetDraft() {
+    state.blue = [];
+    state.red = [];
+    renderTeams();
+    fetchAnalysis();
+}
+
+// ==========================================
+// BACKGROUND PARTICLES
+// ==========================================
+const cvs = document.getElementById('bg-canvas');
+const bgCtx = cvs.getContext('2d');
+let bgW, bgH, particles = [];
+const mouse = { x: null, y: null, r: 120 };
+
+window.addEventListener('mousemove', e => {
+    mouse.x = e.x;
+    mouse.y = e.y;
+});
+
+function bgResize() {
+    bgW = cvs.width = window.innerWidth;
+    bgH = cvs.height = window.innerHeight;
+    bgInit();
+}
+
+window.addEventListener('resize', bgResize);
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * bgW;
+        this.y = Math.random() * bgH;
+        this.vx = (Math.random() - 0.5) * 0.6;
+        this.vy = (Math.random() - 0.5) * 0.6;
+        this.s = Math.random() * 1.5 + 0.5;
+        this.d = Math.random() * 25 + 5;
     }
 
-    function resetDraft() {
-        state.blueTeam = [];
-        state.redTeam = [];
-        renderTeams();
-        fetchAnalysis();
-    }
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0 || this.x > bgW) this.vx = -this.vx;
+        if (this.y < 0 || this.y > bgH) this.vy = -this.vy;
 
-    // --- INTERACTIVE BACKGROUND ANIMATION ---
-    const canvas = document.getElementById('bg-canvas');
-    const ctx = canvas.getContext('2d');
-    
-    let width, height;
-    let particles = [];
-    
-    const mouse = { x: null, y: null, radius: 150 };
-
-    window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
-
-    function resize() {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-        initParticles();
-    }
-    window.addEventListener('resize', resize);
-
-    class Particle {
-        constructor() {
-            this.x = Math.random() * width;
-            this.y = Math.random() * height;
-            this.vx = (Math.random() - 0.5) * 1;
-            this.vy = (Math.random() - 0.5) * 1;
-            this.size = Math.random() * 2 + 1;
-            this.density = (Math.random() * 30) + 1;
-        }
-
-        update() {
-            this.x += this.vx;
-            this.y += this.vy;
-
-            if (this.x < 0 || this.x > width) this.vx = -this.vx;
-            if (this.y < 0 || this.y > height) this.vy = -this.vy;
-
-            let dx = mouse.x - this.x;
-            let dy = mouse.y - this.y;
-            let distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance < mouse.radius) {
-                const forceDirectionX = dx / distance;
-                const forceDirectionY = dy / distance;
-                const force = (mouse.radius - distance) / mouse.radius;
-                const directionX = forceDirectionX * force * this.density;
-                const directionY = forceDirectionY * force * this.density;
-                
-                this.x -= directionX;
-                this.y -= directionY;
-            }
-        }
-
-        draw() {
-            ctx.fillStyle = 'rgba(59, 130, 246, 0.5)'; 
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.closePath();
-            ctx.fill();
+        if (mouse.x === null) return;
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < mouse.r) {
+            const f = (mouse.r - dist) / mouse.r;
+            this.x -= (dx / dist) * f * this.d;
+            this.y -= (dy / dist) * f * this.d;
         }
     }
 
-    function initParticles() {
-        particles = [];
-        let numberOfParticles = (width * height) / 9000; 
-        for (let i = 0; i < numberOfParticles; i++) {
-            particles.push(new Particle());
-        }
+    draw() {
+        bgCtx.fillStyle = 'rgba(59,130,246,0.4)';
+        bgCtx.beginPath();
+        bgCtx.arc(this.x, this.y, this.s, 0, Math.PI * 2);
+        bgCtx.fill();
     }
+}
 
-    function connect() {
-        let opacityValue = 1;
-        for (let a = 0; a < particles.length; a++) {
-            for (let b = a; b < particles.length; b++) {
-                let dx = particles[a].x - particles[b].x;
-                let dy = particles[a].y - particles[b].y;
-                let distance = dx * dx + dy * dy;
+function bgInit() {
+    particles = [];
+    const n = Math.min((bgW * bgH) / 12000, 120);
+    for (let i = 0; i < n; i++) {
+        particles.push(new Particle());
+    }
+}
 
-                if (distance < (canvas.width / 7) * (canvas.height / 7)) {
-                    opacityValue = 1 - (distance / 20000);
-                    ctx.strokeStyle = 'rgba(59, 130, 246,' + opacityValue + ')';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(particles[a].x, particles[a].y);
-                    ctx.lineTo(particles[b].x, particles[b].y);
-                    ctx.stroke();
-                }
+function bgConnect() {
+    const maxD2 = 18000;
+    for (let a = 0; a < particles.length; a++) {
+        for (let b = a + 1; b < particles.length; b++) {
+            const dx = particles[a].x - particles[b].x;
+            const dy = particles[a].y - particles[b].y;
+            const d2 = dx * dx + dy * dy;
+            if (d2 < maxD2) {
+                bgCtx.strokeStyle = `rgba(59,130,246,${(1 - d2 / maxD2) * 0.25})`;
+                bgCtx.lineWidth = 0.8;
+                bgCtx.beginPath();
+                bgCtx.moveTo(particles[a].x, particles[a].y);
+                bgCtx.lineTo(particles[b].x, particles[b].y);
+                bgCtx.stroke();
             }
         }
     }
+}
 
-    function animate() {
-        ctx.clearRect(0, 0, width, height);
-        for (let i = 0; i < particles.length; i++) {
-            particles[i].update();
-            particles[i].draw();
-        }
-        connect();
-        requestAnimationFrame(animate);
+function bgLoop() {
+    bgCtx.clearRect(0, 0, bgW, bgH);
+    particles.forEach(p => {
+        p.update();
+        p.draw();
+    });
+    bgConnect();
+    requestAnimationFrame(bgLoop);
+}
+
+bgResize();
+bgLoop();
+
+// ==========================================
+// GLOBAL EVENT LISTENERS
+// ==========================================
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+    ov.addEventListener('click', e => {
+        if (e.target === ov) ov.style.display = 'none';
+    });
+});
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            m.style.display = 'none';
+        });
     }
-
-    resize();
-    animate();
-
+});
 </script>
 </body>
 </html>
