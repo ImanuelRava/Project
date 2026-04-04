@@ -14,6 +14,7 @@
             --accent-blue: #3b82f6;
             --accent-red: #ef4444;
             --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
             --border: rgba(255, 255, 255, 0.1);
         }
 
@@ -63,7 +64,7 @@
         .logo-icon { width: 24px; height: 24px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-red)); border-radius: 6px; }
         .creator-text { font-size: 0.75rem; color: var(--text-muted); padding-left: 34px; }
         
-        nav { display: flex; gap: 1rem; }
+        nav { display: flex; gap: 1rem; flex-wrap: wrap; }
         button.tab-btn {
             background: transparent;
             border: none;
@@ -73,6 +74,7 @@
             font-weight: 600;
             border-bottom: 2px solid transparent;
             transition: all 0.2s;
+            font-size: 0.9rem;
         }
         button.tab-btn.active { color: var(--text-main); border-bottom-color: var(--accent-blue); }
         button.tab-btn:hover { color: var(--text-main); }
@@ -82,6 +84,18 @@
         .section { display: none; animation: fadeIn 0.3s ease; flex: 1; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- SVG ICON STYLES --- */
+        .icon-svg {
+            width: 1em;
+            height: 1em;
+            vertical-align: middle;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
 
         /* --- ANALYZER STYLES --- */
         .analyzer-grid {
@@ -122,11 +136,11 @@
             background: var(--bg-input);
             padding: 0.75rem;
             border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s;
             border: 1px solid transparent;
+            position: relative;
         }
-        .hero-card:hover { transform: translateX(5px); border-color: rgba(255,255,255,0.2); }
+        
+        .hero-card:hover { border-color: rgba(255,255,255,0.2); }
         
         .hero-avatar {
             width: 40px; height: 40px; border-radius: 6px; margin-right: 12px;
@@ -135,16 +149,34 @@
         }
         .hero-card img { width: 40px; height: 40px; border-radius: 6px; margin-right: 12px; object-fit: cover; background: #000; }
         
+        .hero-info { flex: 1; }
         .hero-info h4 { font-size: 0.95rem; margin-bottom: 2px; }
         .hero-info p { font-size: 0.75rem; color: var(--text-muted); }
+        
+        .hero-actions { display: flex; align-items: center; gap: 8px; }
+
+        .info-btn {
+            background: transparent;
+            border: none;
+            color: var(--accent-blue);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .info-btn:hover { background: rgba(59, 130, 246, 0.2); }
+
         .remove-btn {
-            margin-left: auto;
             background: transparent;
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            font-size: 1.2rem;
             padding: 0 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .remove-btn:hover { color: var(--accent-red); }
 
@@ -171,7 +203,9 @@
             top: 2rem;
         }
 
-        /* --- Suggestion Box (Spacing Updated) --- */
+        .action-btn-group { display: flex; flex-direction: column; gap: 0.5rem; }
+
+        /* --- Suggestion Box --- */
         .suggestion-box {
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid var(--accent-green);
@@ -179,8 +213,8 @@
             padding: 1rem;
             border-radius: 8px;
             font-size: 0.9rem;
-            display: none; /* Hidden by default */
-            margin-top: 1.5rem; /* Added space between draft and suggestion */
+            display: none;
+            margin-top: 1.5rem;
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
@@ -298,18 +332,238 @@
         .diff-positive { color: var(--accent-blue); font-weight: 700; }
         .diff-negative { color: var(--accent-red); font-weight: 700; }
 
-        .btn-reset {
-            width: 100%;
+        .btn-reset, .btn-ban {
             padding: 0.8rem;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid var(--accent-red);
-            color: var(--accent-red);
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid transparent;
+            width: 100%;
+        }
+
+        .btn-reset {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--accent-red);
+            color: var(--accent-red);
         }
         .btn-reset:hover { background: var(--accent-red); color: white; }
+
+        .btn-ban {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
+        }
+        .btn-ban:hover { background: var(--accent-purple); color: white; }
+
+
+        /* --- NEW SCOUTING SECTION STYLES --- */
+        .scout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .scout-column {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+        }
+
+        .scout-subsection {
+            margin-bottom: 2rem;
+        }
+        .scout-subsection:last-child { margin-bottom: 0; }
+
+        .scout-header {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* --- NEW: NODE GRAPH STYLES --- */
+        .graph-container {
+            position: relative;
+            width: 100%;
+            height: 380px; /* Fixed height for the canvas */
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .graph-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Let clicks pass through to nodes */
+        }
+
+        .graph-edge {
+            stroke: var(--accent-blue);
+            stroke-linecap: round;
+            opacity: 0.4;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            pointer-events: stroke; /* Allow hovering the line */
+        }
+        
+        .graph-edge:hover {
+            stroke: #fff;
+            opacity: 1;
+            stroke-width: 4px !important; /* Force thicker on hover */
+        }
+
+        .graph-node {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .graph-node img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        .graph-node:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+            z-index: 20;
+        }
+
+        .graph-node-label {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            white-space: nowrap;
+            color: var(--text-muted);
+            pointer-events: none;
+            font-weight: 600;
+        }
+
+        /* Priority List Styles */
+        .priority-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .priority-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .priority-name { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+        .priority-stats { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* --- BAN MODAL IMPROVED STYLES --- */
+        .ban-modal-container {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            width: 90%;
+            max-width: 900px;
+            max-height: 85vh;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .ban-split-view {
+            display: flex;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .ban-side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+        }
+        .ban-side:last-child { border-right: none; }
+
+        .ban-side-header {
+            padding: 1rem 1.5rem;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .ban-side-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .blue-header h3 { color: var(--accent-blue); border-bottom: 2px solid var(--accent-blue); display: inline-block; padding-bottom: 4px; }
+        .red-header h3 { color: var(--accent-red); border-bottom: 2px solid var(--accent-red); display: inline-block; padding-bottom: 4px; }
+
+        .ban-list-container {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .ban-item-improved {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-input);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid transparent;
+        }
+        .ban-item-improved.blue { border-left-color: var(--accent-blue); }
+        .ban-item-improved.red { border-left-color: var(--accent-red); }
+
+        .ban-hero-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ban-hero-name { font-weight: 700; font-size: 1rem; }
+        
+        .ban-reason-badge {
+            font-size: 0.75rem;
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-align: right;
+            line-height: 1.2;
+        }
 
         /* --- STATS TABLE STYLES (Hero Stats Tab) --- */
         .filters {
@@ -322,8 +576,11 @@
             padding: 1rem;
             border-radius: 8px;
             border: 1px solid var(--border);
-            align-items: center;
+            align-items: flex-end;
         }
+
+        .filter-group { display: flex; flex-direction: column; }
+        .filter-group label { font-size:0.8rem; color:var(--text-muted); margin-bottom:4px; }
 
         select {
             background: var(--bg-input);
@@ -375,7 +632,11 @@
             font-size: 0.85rem; color: var(--text-muted);
         }
 
-        .chevron { transition: transform 0.3s ease; font-size: 1.2rem; }
+        .chevron { 
+            transition: transform 0.3s ease; 
+            display: flex; 
+            align-items: center; 
+        }
         .match-card.active .chevron { transform: rotate(180deg); }
 
         .btn-import {
@@ -389,10 +650,7 @@
             font-weight: 600;
             transition: all 0.2s;
         }
-        .btn-import:hover {
-            background: var(--accent-green);
-            color: white;
-        }
+        .btn-import:hover { background: var(--accent-green); color: white; }
 
         .match-body { padding: 1rem; }
         
@@ -423,7 +681,7 @@
         .ban-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
         .ban-row:last-child { margin-bottom: 0; }
 
-        /* Modal */
+        /* --- MODALS --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.8);
@@ -453,6 +711,20 @@
         .grid-item img { width: 40px; height: 40px; border-radius: 4px; margin-bottom: 4px; object-fit: cover; }
         .grid-item span { display: block; font-size: 0.7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+        /* Relations Modal Specifics */
+        .relations-content { padding: 0 1.5rem 1.5rem; overflow-y: auto; }
+        .relation-col { margin-bottom: 1.5rem; }
+        .relation-col h4 { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+        .relation-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .relation-item {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--bg-input); padding: 0.5rem 0.8rem; border-radius: 6px;
+        }
+        .rel-name { font-weight: 600; font-size: 0.9rem; }
+        .rel-stats { font-size: 0.8rem; color: var(--text-muted); }
+        .wr-good { color: var(--accent-green); font-weight: bold; }
+        .wr-bad { color: var(--accent-red); font-weight: bold; }
+
         .loading { text-align: center; padding: 2rem; color: var(--text-muted); }
         .error { text-align: center; padding: 2rem; color: var(--accent-red); border: 1px solid var(--accent-red); border-radius: 8px; margin-bottom: 1rem; }
     </style>
@@ -471,8 +743,9 @@
     </div>
     <nav>
         <button class="tab-btn active" data-tab="analyzer" onclick="switchTab('analyzer')">Draft Analyzer</button>
-        <button class="tab-btn" data-tab="stats" onclick="switchTab('stats')">Tournament Statistics</button>
-        <button class="tab-btn" data-tab="database" onclick="switchTab('database')">Tournament Results</button>
+        <button class="tab-btn" data-tab="scouting" onclick="switchTab('scouting')">Team Scouting</button>
+        <button class="tab-btn" data-tab="stats" onclick="switchTab('stats')">Tournament Stats</button>
+        <button class="tab-btn" data-tab="database" onclick="switchTab('database')">Match History</button>
     </nav>
 </header>
 
@@ -498,7 +771,25 @@
 
             <!-- Analysis Panel (Center) -->
             <div class="analysis-panel">
-                <button class="btn-reset" onclick="resetDraft()">↺ Reset Draft</button>
+                <div class="action-btn-group">
+                    <!-- Ban Suggestions Button -->
+                    <button class="btn-ban" onclick="openBanModal()">
+                        <svg class="icon-svg" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                        </svg>
+                        Analyze Ban Targets
+                    </button>
+                    
+                    <!-- Reset Button -->
+                    <button class="btn-reset" onclick="resetDraft()">
+                        <svg class="icon-svg" viewBox="0 0 24 24">
+                            <path d="M23 4v6h-6"></path>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        Reset Draft
+                    </button>
+                </div>
 
                 <!-- Circular Win Probability -->
                 <div class="circles-container">
@@ -565,26 +856,73 @@
         </div>
     </section>
 
+    <!-- NEW: SCOUTING SECTION -->
+    <section id="scouting" class="section">
+        <div class="filters" style="margin-bottom: 1.5rem; align-items: center;">
+            <div style="flex:1">
+                <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:4px;">Select Team to Scout</label>
+                <select id="scout-team-select" style="width:100%; max-width:300px;" onchange="loadTeamSignatures()">
+                    <option value="">Select Team...</option>
+                </select>
+            </div>
+        </div>
+        
+        <h2 id="scout-team-name" style="margin-bottom:1.5rem; font-weight:700; display:none;">Team Analysis</h2>
+        
+        <div id="scout-content" class="scout-grid" style="display:none;">
+            <!-- Left: Pairings (Node Graph) -->
+            <div class="scout-column">
+                <div class="scout-header">Preferred Pairings Network</div>
+                <!-- NEW: Graph Container -->
+                <div id="pairings-graph" class="graph-container">
+                    <!-- SVG and Nodes injected via JS -->
+                </div>
+                <div style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:5px;">
+                    Hover nodes to highlight connections. Line thickness = pairing frequency.
+                </div>
+            </div>
+
+            <!-- Right: Phases -->
+            <div class="scout-column">
+                <div class="scout-subsection">
+                    <div class="scout-header" style="color:var(--accent-green)">Phase 1 Priority Picks</div>
+                    <div id="scout-p1" class="priority-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                
+                <div class="scout-subsection">
+                    <div class="scout-header" style="color:var(--accent-blue)">Phase 2 Priority Picks</div>
+                    <div id="scout-p2" class="priority-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="scout-placeholder" class="loading">Select a team to view analysis.</div>
+    </section>
+
     <!-- STATS SECTION -->
     <section id="stats" class="section">
         <div class="filters">
-            <div>
-                <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:4px;">Tournament</label>
+            <div class="filter-group">
+                <label>Tournament</label>
                 <select id="stats-tournament" onchange="loadStatsTable()"></select>
             </div>
-            <div>
-                <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:4px;">Map</label>
+            <div class="filter-group">
+                <label>Map</label>
                 <select id="stats-map" onchange="loadStatsTable()"></select>
             </div>
-            <div>
-                <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:4px;">Side</label>
+            <div class="filter-group">
+                <label>Side</label>
                 <select id="stats-side" onchange="loadStatsTable()">
                     <option value="Blue">Blue Side</option>
                     <option value="Red">Red Side</option>
                 </select>
             </div>
-             <div>
-                <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:4px;">Sort By</label>
+             <div class="filter-group">
+                <label>Sort By</label>
                 <select id="stats-sort" onchange="loadStatsTable()">
                     <option value="Total Picks">Total Picks</option>
                     <option value="Pick P1">Pick P1</option>
@@ -640,10 +978,79 @@
     <div class="modal">
         <div class="modal-header">
             <h3>Select a Hero</h3>
-            <button class="remove-btn" onclick="closeModal()">✕</button>
+            <button class="remove-btn" onclick="closeModal()">
+                <svg class="icon-svg" viewBox="0 0 24 24">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
         </div>
         <input type="text" class="modal-search" id="hero-search" placeholder="Search hero name..." onkeyup="filterHeroes()">
         <div class="hero-grid" id="hero-grid"></div>
+    </div>
+</div>
+
+<!-- HERO RELATIONS MODAL -->
+<div class="modal-overlay" id="relations-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="rel-hero-name">Hero Name</h3>
+            <button class="remove-btn" onclick="closeRelationsModal()">
+                <svg class="icon-svg" viewBox="0 0 24 24">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="relations-content">
+            <div class="relation-col">
+                <h4>Best Synergy (Win Rate)</h4>
+                <div id="rel-synergy-list" class="relation-list">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+            <div class="relation-col">
+                <h4 style="color: var(--accent-red); border-color: var(--accent-red);">Strong Counters</h4>
+                <div id="rel-counter-list" class="relation-list">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- UPDATED: BAN SUGGESTIONS MODAL -->
+<div class="modal-overlay" id="ban-modal">
+    <div class="ban-modal-container">
+        <div class="modal-header">
+            <h3>Team Analysis</h3>
+            <button class="remove-btn" onclick="closeBanModal()">
+                <svg class="icon-svg" viewBox="0 0 24 24">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="ban-split-view">
+            <!-- Blue Team Threats -->
+            <div class="ban-side">
+                <div class="ban-side-header blue-header">
+                    <h3>Blue Team Threats</h3>
+                </div>
+                <div class="ban-list-container" id="ban-list-blue">
+                    <div class="loading">Analyzing...</div>
+                </div>
+            </div>
+            <!-- Red Team Threats -->
+            <div class="ban-side">
+                <div class="ban-side-header red-header">
+                    <h3>Red Team Threats</h3>
+                </div>
+                <div class="ban-list-container" id="ban-list-red">
+                    <div class="loading">Analyzing...</div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -665,6 +1072,7 @@
         if (state.isApiConnected) {
             await Promise.all([loadHeroData(), loadMatches(), loadFilters()]);
             renderTeams(); 
+            populateScoutFilter();
         }
     });
 
@@ -718,6 +1126,299 @@
         populateStatsFilters();
     }
 
+    // --- UPDATED: TEAM SCOUTING LOGIC ---
+
+    function populateScoutFilter() {
+        const select = document.getElementById('scout-team-select');
+        select.innerHTML = '<option value="">Select Team...</option>';
+        const teams = state.filters.teams || [];
+        teams.forEach(t => {
+            if(t !== 'All') {
+                const opt = document.createElement('option');
+                opt.value = t; opt.innerText = t;
+                select.appendChild(opt);
+            }
+        });
+    }
+
+    // --- NEW: NODE GRAPH RENDERER ---
+    function renderPairingsGraph(pairings) {
+        const container = document.getElementById('pairings-graph');
+        container.innerHTML = ''; // Clear previous
+
+        if (!pairings || pairings.length === 0) {
+            container.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem; display:flex; align-items:center; justify-content:center; height:100%;">No pairings found.</div>';
+            return;
+        }
+
+        // 1. Extract unique nodes
+        const uniqueHeroes = new Set();
+        pairings.forEach(p => {
+            uniqueHeroes.add(p.heroes[0]);
+            uniqueHeroes.add(p.heroes[1]);
+        });
+        const nodes = Array.from(uniqueHeroes);
+
+        // 2. Calculate Positions (Circular Layout)
+        const width = container.offsetWidth;
+        const height = container.offsetHeight;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radius = Math.min(width, height) / 2 - 40; // Padding
+
+        const positions = {};
+        nodes.forEach((node, index) => {
+            const angle = (index / nodes.length) * 2 * Math.PI - (Math.PI / 2); // Start from top
+            positions[node] = {
+                x: centerX + radius * Math.cos(angle),
+                y: centerY + radius * Math.sin(angle)
+            };
+        });
+
+        // 3. Create SVG Element for Edges
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("class", "graph-svg");
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("height", "100%");
+        
+        // 4. Draw Edges
+        // Normalize stroke width based on count
+        const maxCount = Math.max(...pairings.map(p => p.count));
+
+        pairings.forEach(p => {
+            const [h1, h2] = p.heroes;
+            const pos1 = positions[h1];
+            const pos2 = positions[h2];
+
+            if (pos1 && pos2) {
+                const line = document.createElementNS(svgNS, "line");
+                line.setAttribute("x1", pos1.x);
+                line.setAttribute("y1", pos1.y);
+                line.setAttribute("x2", pos2.x);
+                line.setAttribute("y2", pos2.y);
+                line.setAttribute("class", "graph-edge");
+                
+                // Dynamic stroke width: min 1px, max 4px
+                const width = 1 + (p.count / maxCount) * 3;
+                line.setAttribute("stroke-width", width);
+
+                // Interaction: Hover Edge -> Highlight Nodes
+                line.addEventListener('mouseenter', () => {
+                    document.querySelectorAll(`[data-hero="${h1}"]`).forEach(el => el.style.border = "2px solid #fff");
+                    document.querySelectorAll(`[data-hero="${h2}"]`).forEach(el => el.style.border = "2px solid #fff");
+                    line.style.opacity = 1;
+                });
+                line.addEventListener('mouseleave', () => {
+                    document.querySelectorAll(`[data-hero="${h1}"]`).forEach(el => el.style.border = "");
+                    document.querySelectorAll(`[data-hero="${h2}"]`).forEach(el => el.style.border = "");
+                    line.style.opacity = "";
+                });
+
+                svg.appendChild(line);
+            }
+        });
+
+        container.appendChild(svg);
+
+        // 5. Draw Nodes
+        nodes.forEach(hero => {
+            const pos = positions[hero];
+            const node = document.createElement("div");
+            node.className = "graph-node";
+            node.style.left = `${pos.x}px`;
+            node.style.top = `${pos.y}px`;
+            node.dataset.hero = hero; // For edge interaction
+
+            const imgPath = `/static/hero_icon/${encodeURIComponent(hero)}.png`;
+            node.innerHTML = `
+                <img src="${imgPath}" onerror="this.src='https://via.placeholder.com/50/1e293b/FFF?text=${hero.charAt(0)}'">
+                <div class="graph-node-label">${hero}</div>
+            `;
+
+            // Interaction: Hover Node -> Highlight Edges
+            node.addEventListener('mouseenter', () => {
+                // Find edges connected to this hero
+                Array.from(svg.children).forEach(line => {
+                    // We need to check if the line connects to this node's position (approximate check or rely on logic)
+                    // Simpler: Re-iterate pairings to find lines
+                    const connected = pairings.find(p => p.heroes.includes(hero));
+                    // This is tricky with SVG lines directly. 
+                    // Better approach: We have the positions, but we didn't store the line element reference.
+                    // Let's use a class toggle approach on the SVG lines if we had IDs. 
+                    // Instead, let's just opacity ALL lines and make connected ones opaque.
+                });
+                
+                // Highlight Logic
+                Array.from(svg.children).forEach(line => {
+                    const x1 = parseFloat(line.getAttribute("x1"));
+                    const y1 = parseFloat(line.getAttribute("y1"));
+                    const x2 = parseFloat(line.getAttribute("x2"));
+                    const y2 = parseFloat(line.getAttribute("y2"));
+                    
+                    // Check if line touches this node (allow small margin)
+                    const dist1 = Math.hypot(x1 - pos.x, y1 - pos.y);
+                    const dist2 = Math.hypot(x2 - pos.x, y2 - pos.y);
+
+                    if (dist1 < 5 || dist2 < 5) {
+                        line.style.opacity = 1;
+                        line.style.stroke = "#fff";
+                        line.style.strokeWidth = "4px";
+                    } else {
+                        line.style.opacity = 0.1;
+                    }
+                });
+            });
+
+            node.addEventListener('mouseleave', () => {
+                Array.from(svg.children).forEach(line => {
+                    line.style.opacity = "";
+                    line.style.stroke = "";
+                    line.style.strokeWidth = ""; // reset to css
+                });
+            });
+
+            container.appendChild(node);
+        });
+    }
+
+    async function loadTeamSignatures() {
+        const teamName = document.getElementById('scout-team-select').value;
+        const placeholder = document.getElementById('scout-placeholder');
+        const content = document.getElementById('scout-content');
+        const title = document.getElementById('scout-team-name');
+        
+        if (!teamName) {
+            title.style.display = 'none';
+            content.style.display = 'none';
+            placeholder.style.display = 'block';
+            return;
+        }
+
+        title.style.display = 'block';
+        content.style.display = 'grid';
+        placeholder.style.display = 'none';
+        title.innerText = `${teamName} Analysis`;
+
+        // Clear previous
+        document.getElementById('pairings-graph').innerHTML = '<div class="loading">Loading Graph...</div>';
+        document.getElementById('scout-p1').innerHTML = '';
+        document.getElementById('scout-p2').innerHTML = '';
+
+        try {
+            const res = await fetch(`${API_BASE}/team-signatures/${encodeURIComponent(teamName)}`);
+            const data = await res.json();
+
+            // 1. Render Graph (Replaces List)
+            renderPairingsGraph(data.pairings);
+
+            // 2. Render Phase 1
+            const p1Container = document.getElementById('scout-p1');
+            if (data.priority_p1 && data.priority_p1.length > 0) {
+                p1Container.innerHTML = data.priority_p1.map(p => {
+                    const img = `/static/hero_icon/${encodeURIComponent(p.hero)}.png`;
+                    return `
+                        <div class="priority-item">
+                            <div class="priority-name">
+                                <img src="${img}" class="pair-hero-icon" style="width:28px;height:28px;" onerror="this.style.display='none'">
+                                ${p.hero}
+                            </div>
+                            <div class="priority-stats">WR: <span style="color:${p.win_rate>50?'var(--accent-green)':'var(--accent-red)'}">${p.win_rate}%</span> | ${p.count} Picks</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                p1Container.innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem;">No data.</div>';
+            }
+
+            // 3. Render Phase 2
+            const p2Container = document.getElementById('scout-p2');
+            if (data.priority_p2 && data.priority_p2.length > 0) {
+                p2Container.innerHTML = data.priority_p2.map(p => {
+                    const img = `/static/hero_icon/${encodeURIComponent(p.hero)}.png`;
+                    return `
+                        <div class="priority-item">
+                            <div class="priority-name">
+                                <img src="${img}" class="pair-hero-icon" style="width:28px;height:28px;" onerror="this.style.display='none'">
+                                ${p.hero}
+                            </div>
+                            <div class="priority-stats">WR: <span style="color:${p.win_rate>50?'var(--accent-green)':'var(--accent-red)'}">${p.win_rate}%</span> | ${p.count} Picks</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                p2Container.innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem;">No data.</div>';
+            }
+
+        } catch(e) {
+            console.error(e);
+            document.getElementById('pairings-graph').innerHTML = '<div class="error">Error loading data.</div>';
+        }
+    }
+
+    // --- UPDATED: BAN MODAL LOGIC ---
+    async function openBanModal() {
+        document.getElementById('ban-modal').style.display = 'flex';
+        
+        const blueList = document.getElementById('ban-list-blue');
+        const redList = document.getElementById('ban-list-red');
+        
+        blueList.innerHTML = '<div class="loading">Analyzing...</div>';
+        redList.innerHTML = '<div class="loading">Analyzing...</div>';
+
+        try {
+            // Analyze for Blue (Protect Blue Team)
+            const resBlue = await fetch(`${API_BASE}/suggest-bans`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ my_team: state.blueTeam, enemy_team: state.redTeam })
+            });
+            const dataBlue = await resBlue.json();
+
+            // Analyze for Red (Protect Red Team)
+            const resRed = await fetch(`${API_BASE}/suggest-bans`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ my_team: state.redTeam, enemy_team: state.blueTeam })
+            });
+            const dataRed = await resRed.json();
+
+            const renderBans = (list, data) => {
+                if(!data.suggestions || data.suggestions.length === 0) {
+                    list.innerHTML = '<div style="padding:1rem; color:var(--text-muted); font-size:0.9rem;">No strong threats detected.</div>';
+                    return;
+                }
+                list.innerHTML = data.suggestions.map(s => `
+                    <div class="ban-item-improved">
+                        <div class="ban-hero-info">
+                            <img src="/static/hero_icon/${encodeURIComponent(s.name)}.png" 
+                                 class="pair-hero-icon" 
+                                 style="width:48px; height:48px;" 
+                                 onerror="this.style.display='none'">
+                            <span class="ban-hero-name">${s.name}</span>
+                        </div>
+                        <div class="ban-reason-badge">
+                            ${s.reason}
+                        </div>
+                    </div>
+                `).join('');
+            };
+
+            renderBans(blueList, dataBlue);
+            renderBans(redList, dataRed);
+
+        } catch(e) {
+            blueList.innerHTML = '<div class="error">Error</div>';
+            redList.innerHTML = '';
+        }
+    }
+
+    function closeBanModal() {
+        document.getElementById('ban-modal').style.display = 'none';
+    }
+
+    // --- EXISTING LOGIC (STATS & MATCHES) ---
+
     async function loadStatsTable() {
         if (!state.isApiConnected) return;
 
@@ -740,18 +1441,66 @@
         }
     }
 
-    // --- ANALYSIS LOGIC ---
+    async function openRelationsModal(heroName) {
+        const modal = document.getElementById('relations-modal');
+        document.getElementById('rel-hero-name').innerText = heroName;
+        modal.style.display = 'flex';
+        
+        const synList = document.getElementById('rel-synergy-list');
+        const cntList = document.getElementById('rel-counter-list');
+        synList.innerHTML = '<div class="loading">Loading...</div>';
+        cntList.innerHTML = '<div class="loading">Loading...</div>';
+
+        try {
+            const res = await fetch(`${API_BASE}/hero-relations/${heroName}`);
+            const data = await res.json();
+
+            synList.innerHTML = '';
+            if(data.synergy.length === 0) synList.innerHTML = '<div style="color:var(--text-muted); font-size:0.85rem;">No synergy data found.</div>';
+            data.synergy.forEach(p => {
+                synList.innerHTML += `
+                    <div class="relation-item">
+                        <div class="rel-name">${p.hero}</div>
+                        <div class="rel-stats">
+                            <span class="wr-good">${p.win_rate.toFixed(1)}%</span> 
+                            (${p.matches} games)
+                        </div>
+                    </div>
+                `;
+            });
+
+            cntList.innerHTML = '';
+            if(data.counters.length === 0) cntList.innerHTML = '<div style="color:var(--text-muted); font-size:0.85rem;">No counter data found.</div>';
+            data.counters.forEach(p => {
+                cntList.innerHTML += `
+                    <div class="relation-item">
+                        <div class="rel-name">${p.hero}</div>
+                        <div class="rel-stats">
+                            <span class="wr-good">${p.win_rate.toFixed(1)}%</span> 
+                            vs ${heroName} (${p.matches} games)
+                        </div>
+                    </div>
+                `;
+            });
+
+        } catch(e) {
+            synList.innerHTML = 'Error loading data.';
+            cntList.innerHTML = '';
+        }
+    }
+
+    function closeRelationsModal() {
+        document.getElementById('relations-modal').style.display = 'none';
+    }
 
     async function fetchAnalysis() {
         const tbody = document.getElementById('comparison-tbody');
         
-        // Reset UI if empty
         if (state.blueTeam.length === 0 && state.redTeam.length === 0) {
             document.getElementById('circle-val-blue').innerText = '50.00%';
             document.getElementById('circle-val-red').innerText = '50.00%';
             document.getElementById('circle-prog-blue').style.strokeDashoffset = 157; 
             document.getElementById('circle-prog-red').style.strokeDashoffset = 157;
-            
             tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted)">Select heroes to see stats</td></tr>';
             hideSuggestions();
             return;
@@ -769,30 +1518,25 @@
             
             const data = await res.json();
             
-            // 1. Update Circles
             const circumference = 2 * Math.PI * 40; 
             
-            // Blue
             const bluePerc = data.blue_prob;
             const blueOffset = circumference - (bluePerc / 100) * circumference;
             document.getElementById('circle-prog-blue').style.strokeDasharray = `${circumference} ${circumference}`;
             document.getElementById('circle-prog-blue').style.strokeDashoffset = blueOffset;
             document.getElementById('circle-val-blue').innerText = bluePerc.toFixed(2) + '%';
 
-            // Red
             const redPerc = data.red_prob;
             const redOffset = circumference - (redPerc / 100) * circumference;
             document.getElementById('circle-prog-red').style.strokeDasharray = `${circumference} ${circumference}`;
             document.getElementById('circle-prog-red').style.strokeDashoffset = redOffset;
             document.getElementById('circle-val-red').innerText = redPerc.toFixed(2) + '%';
 
-            // 2. Update Stats Table
             tbody.innerHTML = '';
             
             if (data.stats_table && data.stats_table.length > 0) {
                 data.stats_table.forEach(row => {
                     const diffClass = row.leader === 'blue' ? 'diff-positive' : (row.leader === 'red' ? 'diff-negative' : '');
-                    
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td class="stat-name">${row.stat}</td>
@@ -804,7 +1548,6 @@
                 });
             }
 
-            // 3. Handle Suggestions
             hideSuggestions();
             
             if (data.suggestion) {
@@ -829,8 +1572,6 @@
         document.getElementById('blue-suggestion').style.display = 'none';
         document.getElementById('red-suggestion').style.display = 'none';
     }
-
-    // --- TOURNAMENT IMPORT FEATURE ---
     
     function importDraft(match) {
         const safe = (arr) => arr || [];
@@ -841,8 +1582,6 @@
         renderTeams();
         fetchAnalysis();
     }
-
-    // --- RENDERING LOGIC ---
 
     function populateStatsFilters() {
         const tSelect = document.getElementById('stats-tournament');
@@ -985,12 +1724,17 @@
             const blueBans = [...(m.blue_bans_p1 || []), ...(m.blue_bans_p2 || [])];
             const redBans = [...(m.red_bans_p1 || []), ...(m.red_bans_p2 || [])];
 
+            const chevronSvg = `
+                <svg class="icon-svg" viewBox="0 0 24 24">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>`;
+
             card.innerHTML = `
                 <div class="match-header">
                     <span>${m.tournament} • ${m.map}</span>
                     <div style="display:flex; align-items:center; gap:10px;">
                         <button class="btn-import">Import Draft</button>
-                        <span class="chevron">▼</span>
+                        <span class="chevron">${chevronSvg}</span>
                     </div>
                 </div>
                 <div class="match-body">
@@ -1103,6 +1847,11 @@
         fetchAnalysis(); 
     }
 
+    const icons = {
+        info: `<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`,
+        close: `<svg class="icon-svg" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`
+    };
+
     function renderTeams() {
         const renderList = (team, side) => {
             const container = document.getElementById(`${side}-list`);
@@ -1121,7 +1870,10 @@
                         <h4>${hero}</h4>
                         <p>${state.heroData[hero] ? state.heroData[hero].roles[0] : 'Unknown'}</p>
                     </div>
-                    <button class="remove-btn" onclick="event.stopPropagation(); removeHero('${side}', ${idx})">✕</button>
+                    <div class="hero-actions">
+                        <button class="info-btn" onclick="event.stopPropagation(); openRelationsModal('${hero}')">${icons.info}</button>
+                        <button class="remove-btn" onclick="event.stopPropagation(); removeHero('${side}', ${idx})">${icons.close}</button>
+                    </div>
                 `;
                 container.appendChild(card);
             });
