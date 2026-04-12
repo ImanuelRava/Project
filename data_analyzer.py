@@ -476,9 +476,20 @@ class DataAnalyzer:
         cc = stats['Crowd Control'] * scale_factor
         off = stats['Offense'] * scale_factor
         
-        split_push = (wc + mob + off) / 3.0
-        team_fight = (dur + cc + off) / 3.0
-        pick_off = (cc + off + mob) / 3.0
+        # 1. Split Push
+        # Weights: 3.0, 2.0, 1.0, 0.5 (Total: 6.5)
+        split_push_numerator = (3.0 * wc) + (2.0 * off) + (1.0 * mob) + (0.5 * dur)
+        split_push = split_push_numerator / 6.5
+
+        # 2. Team Fight
+        # Weights: 2.0, 2.5, 2.0, 1.0 (Total: 7.5)
+        team_fight_numerator = (2.0 * cc) + (2.5 * dur) + (2.0 * off) + (1.0 * mob)
+        team_fight = team_fight_numerator / 7.5
+
+        # 3. Pick Off
+        # Weights: 3.0, 2.0, 1.0 (Total: 6.0)
+        pick_off_numerator = (3.0 * off) + (2.0 * mob) + (1.0 * cc)
+        pick_off = pick_off_numerator / 6.0
         
         return {
             "Split Push": round(split_push, 1),
