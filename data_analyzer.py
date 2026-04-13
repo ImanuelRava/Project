@@ -18,6 +18,15 @@ class DataAnalyzer:
         self.is_loaded = False
         self._avg_winning_stats_cache = None
         self._load_errors = []
+
+        # --- Performance Optimization: Data Structures for Pandas Analysis ---
+        # Instead of just a nested list, we maintain flat records for fast vectorized operations
+        self._flat_records = []
+        self._matches_df = None
+        
+        # --- Performance Optimization: Caches for Hero Data ---
+        self._hero_lookup = {}  # Maps lowercased names to data (O(1) lookup)
+        self._stat_cache = {}   # Caches substring search results
         
         self.load_local_data()
 
@@ -81,6 +90,12 @@ class DataAnalyzer:
             if success:
                 logger.info(f"Tournament data loaded successfully. {len(self.matches)} matches.")
                 self.is_loaded = True
+                
+                # Optimization: Create Pandas DataFrame after loading all rows
+                if self._flat_records:
+                    self._matches_df = pd.DataFrame(self._flat_records)
+                    logger.info(f"Optimized DataFrame created with {len(self._matches_df)} hero records.")
+                
                 self._calculate_relationships()
                 logger.info("Hero relationships (Synergy/Counters) calculated.")
             else:
@@ -96,8 +111,10 @@ class DataAnalyzer:
             df_raw = pd.read_excel(file_path, sheet_name='MLBB Statistics', header=None)
             
             header_row_idx = None
+            # Bug Fix: Case-insensitive header search
             for i, row in df_raw.iterrows():
-                if 'Ban 1' in row.values:
+                row_vals_lower = [str(v).lower().strip() for v in row.values]
+                if 'ban 1' in row_vals_lower:
                     header_row_idx = i
                     break
             
@@ -131,7 +148,7 @@ class DataAnalyzer:
             error_count = 0
             for index, row in df.iterrows():
                 try:
-                    self._parse_match_row(row, col_blue_team, col_red_team, col_blue_start, col_red_start)
+                    self._parse_match_row(row, col_blue_team, col_red_team, col_blue_start, col_red_start, index)
                 except Exception as e:
                     error_count += 1
                     logger.debug(f"Error parsing row {index}: {e}")
@@ -145,7 +162,7 @@ class DataAnalyzer:
         except Exception as e:
             return False, str(e)
 
-    def _parse_match_row(self, row, col_blue_team, col_red_team, col_blue_start, col_red_start):
+    def _parse_match_row(self, row, col_blue_team, col_red_team, col_blue_start, col_red_start, match_id):
         def clean_name(name):
             if pd.isna(name):
                 return ""
@@ -175,7 +192,7 @@ class DataAnalyzer:
         blue_result = str(row.iloc[col_blue_start + 10]).strip().upper()
         red_result = str(row.iloc[col_red_start + 10]).strip().upper()
 
-        self.matches.append({
+        match_data = {
             'tournament': tournament,
             'map': selected_map,
             'blue_team': blue_team,
@@ -186,8 +203,44 @@ class DataAnalyzer:
             'red_bans': {'p1': red_bans_p1, 'p2': red_bans_p2},
             'red_picks': {'p1': red_picks_p1, 'p2': red_picks_p2},
             'red_result': red_result
-        })
+        }
+        self.matches.append(match_data)
         
+        # Optimization: Build flat records for Pandas
+        # This allows us to avoid O(N*M) loops later
+        def add_records(side, team, picks, bans, result):
+            for phase, p_list in picks.items():
+                for hero in p_list:
+                    if hero:
+                        self._flat_records.append({
+                            'match_id': match_id,
+                            'tournament': tournament,
+                            'map': selected_map,
+                            'side': side,
+                            'team': team,
+                            'phase': phase,
+                            'type': 'pick',
+                            'hero': hero,
+                            'result': result
+                        })
+            for phase, b_list in bans.items():
+                for hero in b_list:
+                    if hero:
+                        self._flat_records.append({
+                            'match_id': match_id,
+                            'tournament': tournament,
+                            'map': selected_map,
+                            'side': side,
+                            'team': team,
+                            'phase': phase,
+                            'type': 'ban',
+                            'hero': hero,
+                            'result': None
+                        })
+
+        add_records('blue', blue_team, match_data['blue_picks'], match_data['blue_bans'], blue_result)
+        add_records('red', red_team, match_data['red_picks'], match_data['red_bans'], red_result)
+
         all_blue = [p for p in blue_picks_p1 + blue_picks_p2 if p]
         all_red = [p for p in red_picks_p1 + red_picks_p2 if p]
         
@@ -230,6 +283,14 @@ class DataAnalyzer:
     def get_unique_values(self, column, tournament_filter=None):
         if not self.matches:
             return []
+        # Optimization: Use DataFrame if available
+        if self._matches_df is not None:
+            if column == 'team':
+                return sorted(self._matches_df['team'].unique().tolist())
+            elif column in ['tournament', 'map']:
+                return sorted(self._matches_df[column].unique().tolist())
+        
+        # Fallback
         if column == 'team':
             teams = set()
             for m in self.matches:
@@ -241,68 +302,57 @@ class DataAnalyzer:
         return sorted(list(set(m[column] for m in self.matches)))
 
     def get_hero_summary(self, side, tournament_filter=None, map_filter=None, team_filter=None):
-        """Get hero summary with better error handling."""
-        try:
-            stats = collections.defaultdict(lambda: {
-                'picks_p1': 0, 'picks_p2': 0, 'bans_p1': 0, 'bans_p2': 0, 
-                'wins': 0, 'total_picks': 0
-            })
-            
-            for match in self.matches:
-                if not self._passes_filters(match, tournament_filter, map_filter):
-                    continue
-                
-                target_picks, target_bans, target_result = self._get_match_side_data(match, side, team_filter)
-                if target_picks is None:
-                    continue
-                
-                self._update_side_stats(stats, target_picks, target_bans, target_result)
-            
-            return self._build_hero_summary_df(stats)
-            
-        except Exception as e:
-            logger.error(f"Error in get_hero_summary: {e}", exc_info=True)
+        """Optimized using Pandas DataFrame for vectorized aggregation."""
+        if self._matches_df is None or self._matches_df.empty:
             return pd.DataFrame(columns=['Hero', 'Pick P1', 'Pick P2', 'Ban P1', 'Ban P2', 'Total Picks', 'Win Rate'])
+            
+        df = self._matches_df.copy()
+        
+        # Apply Filters
+        if side:
+            df = df[df['side'] == side.lower()]
+        if tournament_filter and tournament_filter != "All":
+            df = df[df['tournament'] == tournament_filter]
+        if map_filter and map_filter != "All":
+            df = df[df['map'] == map_filter]
+        if team_filter and team_filter != "All":
+            df = df[df['team'] == team_filter]
+            
+        # Separate Picks and Bans
+        picks_df = df[df['type'] == 'pick']
+        bans_df = df[df['type'] == 'ban']
+        
+        # Helper to aggregate counts
+        def get_counts(df_source):
+            return df_source.groupby('hero').size()
 
-    def _passes_filters(self, match, tournament_filter, map_filter):
-        if tournament_filter and tournament_filter != "All" and match['tournament'] != tournament_filter:
-            return False
-        if map_filter and map_filter != "All" and match['map'] != map_filter:
-            return False
-        return True
-
-    def _get_match_side_data(self, match, side, team_filter):
-        if side == 'Blue':
-            if team_filter and team_filter != "All" and match['blue_team'] != team_filter:
-                return None, None, None
-            return match['blue_picks'], match['blue_bans'], match['blue_result']
-        else:
-            if team_filter and team_filter != "All" and match['red_team'] != team_filter:
-                return None, None, None
-            return match['red_picks'], match['red_bans'], match['red_result']
-
-    def _update_side_stats(self, stats, target_picks, target_bans, target_result):
-        for phase in ['p1', 'p2']:
-            for hero in target_picks.get(phase, []):
-                if hero:
-                    stats[hero][f'picks_{phase}'] += 1
-                    stats[hero]['total_picks'] += 1
-                    if target_result == 'WIN':
-                        stats[hero]['wins'] += 1
-            for hero in target_bans.get(phase, []):
-                if hero:
-                    stats[hero][f'bans_{phase}'] += 1
-
-    def _build_hero_summary_df(self, stats):
-        data = []
-        for hero, s in stats.items():
-            wr = (s['wins'] / s['total_picks'] * 100) if s['total_picks'] > 0 else 0.0
-            data.append({
-                'Hero': hero, 'Pick P1': s['picks_p1'], 'Pick P2': s['picks_p2'],
-                'Ban P1': s['bans_p1'], 'Ban P2': s['bans_p2'],
-                'Total Picks': s['total_picks'], 'Win Rate': wr
-            })
-        return pd.DataFrame(data)
+        p1_picks = get_counts(picks_df[picks_df['phase'] == 'p1'])
+        p2_picks = get_counts(picks_df[picks_df['phase'] == 'p2'])
+        p1_bans = get_counts(bans_df[bans_df['phase'] == 'p1'])
+        p2_bans = get_counts(bans_df[bans_df['phase'] == 'p2'])
+        
+        total_picks = get_counts(picks_df)
+        wins = get_counts(picks_df[picks_df['result'] == 'WIN'])
+        
+        # Build Result DataFrame
+        stats = pd.DataFrame({
+            'Pick P1': p1_picks,
+            'Pick P2': p2_picks,
+            'Ban P1': p1_bans,
+            'Ban P2': p2_bans,
+            'Total Picks': total_picks,
+            'wins': wins
+        }).fillna(0).astype(int)
+        
+        # Calculate Win Rate safely
+        stats['Win Rate'] = (stats['wins'] / stats['Total Picks'].replace(0, 1) * 100).round(2)
+        stats.loc[stats['Total Picks'] == 0, 'Win Rate'] = 0.0
+        
+        stats = stats.drop(columns=['wins'])
+        stats.index.name = 'Hero'
+        stats = stats.reset_index()
+        
+        return stats.sort_values(by='Total Picks', ascending=False)
 
     def get_hero_win_rate(self, hero_name):
         data = self.hero_win_rates.get(hero_name)
@@ -324,7 +374,7 @@ class DataAnalyzer:
             if stats['total'] >= 2:
                 wr = (stats['wins'] / stats['total']) * 100
                 result.append({'hero': partner, 'win_rate': wr, 'matches': stats['total']})
-        result.sort(key=lambda x: (x['win_rate'], x['matches']), reverse=True)
+        result.sort(key=lambda x: (x['matches'], x['win_rate']), reverse=True)
         return result[:5]
 
     def get_counters_for_hero(self, hero_name):
@@ -339,26 +389,118 @@ class DataAnalyzer:
                 wr = (stats['wins'] / stats['total']) * 100
                 if wr > 50:
                     result.append({'hero': counter, 'win_rate': wr, 'matches': stats['total']})
-        result.sort(key=lambda x: (x['win_rate'], x['matches']), reverse=True)
+        result.sort(key=lambda x: (x['matches'], x['win_rate']), reverse=True)
         return result[:5]
 
-    def get_team_signatures(self, team_name):
-        stats = collections.defaultdict(lambda: {'wins': 0, 'total': 0, 'p1': 0, 'p2': 0})
-        pairings = collections.Counter()
+    def get_team_signatures(self, team_name, tournament_filter=None):
+        stats_blue = {} 
+        stats_red = {} 
+        pairings = {}
+        matches_played = 0
         
-        for match in self.matches:
-            if not self._is_team_in_match(match, team_name):
-                continue
-            is_blue = match['blue_team'] == team_name
-            picks_p1 = match['blue_picks']['p1'] if is_blue else match['red_picks']['p1']
-            picks_p2 = match['blue_picks']['p2'] if is_blue else match['red_picks']['p2']
-            result = match['blue_result'] if is_blue else match['red_result']
-            all_picks = [h for h in picks_p1 + picks_p2 if h]
+        def init_hero(dict_ref, h):
+            dict_ref[h] = {'wins': 0, 'total': 0, 'picks': 0}
 
-            self._update_signature_stats(stats, all_picks, picks_p1, picks_p2, result)
-            self._update_pairings(pairings, all_picks)
+        for match in self.matches:
+            # 1. Filter by Tournament
+            match_tourn = match.get('tournament')
+            if tournament_filter and tournament_filter != "All" and match_tourn != tournament_filter:
+                continue
+                
+            # 2. Check if team is in match
+            blue_team = match.get('blue_team')
+            red_team = match.get('red_team')
+            
+            if not blue_team or not red_team: continue
+
+            is_blue = (blue_team == team_name)
+            is_red = (red_team == team_name)
+            
+            if not is_blue and not is_red:
+                continue
+            
+            matches_played += 1
+            
+            # 3. Extract Data Safely
+            try:
+                side = 'blue' if is_blue else 'red'
+                
+                picks_data = match.get(f'{side}_picks')
+                if not isinstance(picks_data, dict): continue 
+                
+                # We combine P1 and P2 for the side analysis
+                picks_p1 = picks_data.get('p1', [])
+                picks_p2 = picks_data.get('p2', [])
+                
+                result = match.get(f'{side}_result')
+                if result: result = str(result).upper()
+                
+                if not isinstance(picks_p1, list): picks_p1 = []
+                if not isinstance(picks_p2, list): picks_p2 = []
+                
+                all_picks = [h for h in picks_p1 + picks_p2 if h and str(h).strip()]
+                
+                # --- UPDATE STATS BASED ON SIDE ---
+                target_stats = stats_blue if is_blue else stats_red
+                
+                for hero in all_picks:
+                    if hero not in target_stats: init_hero(target_stats, hero)
+                    target_stats[hero]['picks'] += 1
+                    target_stats[hero]['total'] += 1
+                    if result == 'WIN':
+                        target_stats[hero]['wins'] += 1
+                # ----------------------------------
+
+                # --- UPDATE GLOBAL PAIRINGS (Combined) ---
+                for pair in itertools.combinations(all_picks, 2):
+                    h1, h2 = sorted(pair)
+                    key = (h1, h2)
+                    if key not in pairings: pairings[key] = 0
+                    pairings[key] += 1
+                # --------------------------------------
+
+            except Exception:
+                continue
         
-        return self._build_team_signatures(stats, pairings)
+        # 4. Build Result
+        if matches_played == 0:
+            return {
+                'pairings': [], 
+                'priority_blue_side': [], 
+                'priority_red_side': [],
+                'matches_played': 0,
+                'found': False
+            }
+        
+        # --- HELPER TO GENERATE LISTS ---
+        def get_priority_list(source_stats):
+            temp_list = []
+            for hero, s_data in source_stats.items():
+                count = s_data.get('picks', 0)
+                if count > 0:
+                    wins = s_data.get('wins', 0)
+                    total = s_data.get('total', 1)
+                    win_rate = (wins / total * 100) if total > 0 else 0
+                    
+                    temp_list.append({
+                        'hero': hero, 
+                        'count': count, 
+                        'win_rate': round(win_rate, 1)
+                    })
+            
+            temp_list.sort(key=lambda x: (x['count'], x['win_rate']), reverse=True)
+            return temp_list[:5]
+        
+        sorted_pairings = sorted(pairings.items(), key=lambda x: x[1], reverse=True)
+        top_pairings = [{'heroes': list(pair), 'count': count} for pair, count in sorted_pairings if count >= 2][:20]
+
+        return {
+            'pairings': top_pairings, 
+            'priority_blue_side': get_priority_list(stats_blue), 
+            'priority_red_side': get_priority_list(stats_red),
+            'matches_played': matches_played,
+            'found': True
+        }
 
     def _is_team_in_match(self, match, team_name):
         return match['blue_team'] == team_name or match['red_team'] == team_name
@@ -411,43 +553,71 @@ class DataAnalyzer:
         return results
 
     def get_global_meta_stats(self):
-        hero_stats = collections.defaultdict(lambda: {'picks': 0, 'bans': 0, 'wins': 0})
-        for match in self.matches:
-            self._update_global_stats(hero_stats, match['blue_picks'], match['blue_bans'], match['blue_result'])
-            self._update_global_stats(hero_stats, match['red_picks'], match['red_bans'], match['red_result'])
-        return [
-            {'hero': hero, 'win_rate': round((s['wins'] / s['picks']) * 100, 1), 
-             'picks': s['picks'], 'bans': s['bans'], 'presence': s['picks'] + s['bans']}
-            for hero, s in hero_stats.items() if s['picks'] > 0
-        ]
+        """Optimized using Pandas."""
+        if self._matches_df is None or self._matches_df.empty:
+            return []
 
-    def _update_global_stats(self, hero_stats, picks, bans, result):
-        for phase in ['p1', 'p2']:
-            for h in picks.get(phase, []):
-                if h:
-                    hero_stats[h]['picks'] += 1
-                    if result == 'WIN': hero_stats[h]['wins'] += 1
-            for h in bans.get(phase, []):
-                if h: hero_stats[h]['bans'] += 1
+        picks_df = self._matches_df[self._matches_df['type'] == 'pick']
+        bans_df = self._matches_df[self._matches_df['type'] == 'ban']
+        wins_df = picks_df[picks_df['result'] == 'WIN']
+
+        picks_count = picks_df.groupby('hero').size()
+        bans_count = bans_df.groupby('hero').size()
+        wins_count = wins_df.groupby('hero').size()
+
+        meta = pd.DataFrame({
+            'picks': picks_count,
+            'bans': bans_count,
+            'wins': wins_count
+        }).fillna(0).astype(int)
+        
+        meta['presence'] = meta['picks'] + meta['bans']
+        meta['win_rate'] = (meta['wins'] / meta['picks'].replace(0, 1) * 100).round(1)
+        meta.loc[meta['picks'] == 0, 'win_rate'] = 0.0
+
+        result = []
+        for hero, row in meta.iterrows():
+            if row['picks'] > 0:
+                result.append({
+                    'hero': hero,
+                    'win_rate': row['win_rate'],
+                    'picks': int(row['picks']),
+                    'bans': int(row['bans']),
+                    'presence': int(row['presence'])
+                })
+        
+        return sorted(result, key=lambda x: x['picks'], reverse=True)
 
     def set_hero_data(self, hero_data):
         self.hero_data_dict = hero_data
+        # Optimization: Build case-insensitive lookup map
+        self._hero_lookup = {k.lower(): v for k, v in hero_data.items()}
         self._avg_winning_stats_cache = None
+        self._stat_cache = {} 
 
     def _get_hero_stat(self, hero_name, stat_name):
-        if not self.hero_data_dict:
+        if not hero_name or not self.hero_data_dict:
             return 0.0
-        if hero_name in self.hero_data_dict:
-            return self.hero_data_dict[hero_name]['stats'].get(stat_name, 0.0)
         
-        hero_name_lower = hero_name.lower()
-        for key, data in self.hero_data_dict.items():
-            if key.lower() == hero_name_lower:
-                return data['stats'].get(stat_name, 0.0)
-        for key, data in self.hero_data_dict.items():
-            if hero_name_lower in key.lower() or key.lower() in hero_name_lower:
-                return data['stats'].get(stat_name, 0.0)
-        return 0.0
+        key = hero_name.lower()
+        
+        # Optimization 1: O(1) Lookup
+        if key in self._hero_lookup:
+            return self._hero_lookup[key].get('stats', {}).get(stat_name, 0.0)
+        
+        # Optimization 2: Fallback substring search (cached)
+        cache_key = (hero_name, stat_name)
+        if cache_key in self._stat_cache:
+            return self._stat_cache[cache_key]
+            
+        val = 0.0
+        for dict_key, data in self.hero_data_dict.items():
+            if key in dict_key.lower() or dict_key.lower() in key:
+                val = data.get('stats', {}).get(stat_name, 0.0)
+                break
+        
+        self._stat_cache[cache_key] = val
+        return val
 
     def _calculate_team_stats(self, team_heroes):
         stats = {'Durability': 0, 'Offense': 0, 'Crowd Control': 0, 'Mobility': 0, 'Wave Control': 0}
@@ -476,18 +646,12 @@ class DataAnalyzer:
         cc = stats['Crowd Control'] * scale_factor
         off = stats['Offense'] * scale_factor
         
-        # 1. Split Push
-        # Weights: 3.0, 2.0, 1.0, 0.5 (Total: 6.5)
         split_push_numerator = (3.0 * wc) + (2.0 * off) + (1.0 * mob) + (0.5 * dur)
         split_push = split_push_numerator / 6.5
 
-        # 2. Team Fight
-        # Weights: 2.0, 2.5, 2.0, 1.0 (Total: 7.5)
         team_fight_numerator = (2.0 * cc) + (2.5 * dur) + (2.0 * off) + (1.0 * mob)
         team_fight = team_fight_numerator / 7.5
 
-        # 3. Pick Off
-        # Weights: 3.0, 2.0, 1.0 (Total: 6.0)
         pick_off_numerator = (3.0 * off) + (2.0 * mob) + (1.0 * cc)
         pick_off = pick_off_numerator / 6.0
         
@@ -569,8 +733,6 @@ class DataAnalyzer:
         }
 
     def _get_strategy(self, my_potentials, enemy_potentials):
-        """Determine strategy by finding an archetype where I out-stat the enemy.
-        If I lose all matchups, fall back to the archetype closest in value to the enemy team."""
         if not my_potentials or not enemy_potentials:
             return "Calculating..."
         
@@ -583,30 +745,25 @@ class DataAnalyzer:
             "Establish vision control in jungle areas to ambush and eliminate isolated enemy heroes, creating a numbers advantage for your team."
         }
         
-        # Step 1: Sort my archetypes from highest score to lowest
         sorted_mine = sorted(my_potentials.items(), key=lambda x: x[1], reverse=True)
         
-        # Step 2: Go down the list. If my score > enemy's score for that archetype, use it.
         for arch_name, my_score in sorted_mine:
             enemy_score = enemy_potentials.get(arch_name, 0)
             if my_score > enemy_score:
                 return strategy_map.get(arch_name, "Play standard macro.")
         
-        # Step 3: If I lose all matchups, find the archetype with the closest value to the enemy team
         min_diff = float('inf')
         closest_arch = None
         
         for arch_name, my_score in sorted_mine:
             enemy_score = enemy_potentials.get(arch_name, 0)
             diff = abs(enemy_score - my_score)
-            
             if diff < min_diff:
                 min_diff = diff
                 closest_arch = arch_name
                 
         if closest_arch:
             return strategy_map.get(closest_arch, "Play standard macro.")
-            
         return "Play standard macro."
     
     def _normalize_stats(self, stats, hero_count):
@@ -614,3 +771,106 @@ class DataAnalyzer:
         if hero_count == 5: return stats
         scale = 5.0 / hero_count
         return {k: v * scale for k, v in stats.items()}
+
+    def get_map_win_rates(self):
+        if self._matches_df is None or self._matches_df.empty:
+            return []
+            
+        match_map_counts = self._matches_df[['match_id', 'map']].drop_duplicates().groupby('map').size()
+        
+        blue_wins_df = self._matches_df[(self._matches_df['side'] == 'blue') & (self._matches_df['result'] == 'WIN')]
+        blue_wins_counts = blue_wins_df[['match_id', 'map']].drop_duplicates().groupby('map').size()
+        
+        result = []
+        for map_name, total in match_map_counts.items():
+            blue_w = blue_wins_counts.get(map_name, 0)
+            red_w = total - blue_w 
+            blue_wr = (blue_w / total) * 100
+            red_wr = (red_w / total) * 100
+            
+            result.append({
+                'map': map_name,
+                'total_matches': int(total),
+                'blue_win_rate': round(blue_wr, 1),
+                'red_win_rate': round(red_wr, 1),
+                'dominant_side': 'Blue' if blue_wr > 50 else 'Red' if red_wr > 50 else 'Balanced'
+            })
+        
+        return sorted(result, key=lambda x: x['total_matches'], reverse=True)
+
+    def get_map_leaders(self, map_name):
+        """Optimized using Pandas."""
+        if self._matches_df is None or self._matches_df.empty:
+            return []
+            
+        map_df = self._matches_df[self._matches_df['map'] == map_name]
+        picks_df = map_df[map_df['type'] == 'pick']
+        
+        if picks_df.empty:
+            return []
+            
+        hero_stats = picks_df.groupby('hero').agg(
+            picks=('hero', 'size'),
+            wins=('result', lambda x: (x == 'WIN').sum())
+        ).reset_index()
+        
+        hero_stats['win_rate'] = (hero_stats['wins'] / hero_stats['picks'] * 100).round(1)
+        
+        leaders = hero_stats[hero_stats['picks'] >= 2].sort_values(
+            by=['picks', 'win_rate'], ascending=[False, False]
+        )
+        
+        return leaders.head(5).to_dict('records')
+    
+    def get_suggested_bans(self, side='Blue', tournament_filter=None):
+        """
+        Returns top ban targets based on tournament statistics for a specific side (Blue/Red).
+        Metrics: Ban Frequency and Ban Win Rate (Win rate when hero was banned).
+        """
+        if self._matches_df is None or self._matches_df.empty:
+            return []
+        
+        df = self._matches_df.copy()
+        
+        # 1. Filter by Side
+        df = df[df['side'] == side.lower()]
+        
+        # 2. Filter by Tournament
+        if tournament_filter and tournament_filter != "All":
+            df = df[df['tournament'] == tournament_filter]
+            
+        if df.empty:
+            return []
+            
+        # 3. Identify Winning Matches for this side
+        winning_match_ids = df[(df['type'] == 'pick') & (df['result'] == 'WIN')]['match_id'].unique()
+        
+        # 4. Filter Bans
+        df_bans = df[df['type'] == 'ban']
+        
+        if df_bans.empty:
+            return []
+        
+        # 5. Total Ban Count per Hero
+        total_bans = df_bans.groupby('hero').size().reset_index(name='total_bans')
+        
+        # 6. Winning Ban Count (Effective Bans)
+        winning_bans = df_bans[df_bans['match_id'].isin(winning_match_ids)]
+        winning_ban_counts = winning_bans.groupby('hero').size().reset_index(name='winning_bans')
+        
+        # 7. Merge and Calculate Stats
+        stats = total_bans.merge(winning_ban_counts, on='hero', how='left').fillna(0)
+        stats['winning_bans'] = stats['winning_bans'].astype(int)
+        
+        # Ban Win Rate: (Matches Won with Ban) / (Total Matches with Ban)
+        stats['ban_win_rate'] = (stats['winning_bans'] / stats['total_bans'] * 100).round(1)
+        
+        # Total matches played by this side to calculate Ban Frequency percentage
+        total_matches_played = df[['match_id']].drop_duplicates().shape[0]
+        
+        stats['ban_frequency'] = (stats['total_bans'] / total_matches_played * 100).round(1)
+        
+        # Sort: First by Ban Frequency (Meta), then by Ban Win Rate (Effectiveness)
+        stats = stats.sort_values(by=['total_bans', 'ban_win_rate'], ascending=[False, False])
+        
+        return stats.head(5).to_dict('records')

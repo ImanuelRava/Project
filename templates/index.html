@@ -1422,12 +1422,16 @@
 
     <!-- ========== TEAM SCOUTING ========== -->
     <section id="scouting" class="section">
-        <div class="filters card" style="align-items:center">
-            <div style="flex:1">
-                <label style="font-size:0.68rem;color:var(--text-muted);display:block;margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">
-                    Select Team to Scout
-                </label>
-                <select id="scout-team-select" style="width:100%;max-width:280px" onchange="loadTeamSignatures()">
+        <div class="filters card">
+            <div class="filter-group">
+                <label>Tournament</label>
+                <select id="scout-tournament-select" onchange="loadTeamSignatures()">
+                    <option value="All">All Tournaments</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Team</label>
+                <select id="scout-team-select" onchange="loadTeamSignatures()">
                     <option value="">Choose a team...</option>
                 </select>
             </div>
@@ -1441,11 +1445,11 @@
             </div>
             <div class="scout-column card">
                 <div class="scout-subsection">
-                    <div class="section-header" style="color:var(--accent-green)">Phase 1 Priority Picks</div>
+                    <div class="section-header" style="color:var(--accent-blue)">Blue Side Priority Picks</div>
                     <div id="scout-p1" class="priority-list"></div>
                 </div>
                 <div class="scout-subsection">
-                    <div class="section-header" style="color:var(--accent-blue)">Phase 2 Priority Picks</div>
+                    <div class="section-header" style="color:var(--accent-red)">Red Side Priority Picks</div>
                     <div id="scout-p2" class="priority-list"></div>
                 </div>
             </div>
@@ -1467,10 +1471,26 @@
         </div>
         <div style="margin-top:1.5rem">
             <div class="card" style="padding:1.25rem">
-                <div class="section-header">Highest Win Rates (Min 5 Games)</div>
+                <div class="section-header">Highest Win Rates</div>
                 <div id="meta-wr-list" class="loading">Loading...</div>
             </div>
         </div>
+        
+        <!-- NEW: MAP META SECTION -->
+        <div style="margin-top:1.5rem; display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+            <div class="card" style="padding:1.25rem">
+                <div class="section-header">Map Side Advantage</div>
+                <div id="map-adv-list" class="loading">Loading...</div>
+            </div>
+            <div class="card" style="padding:1.25rem">
+                <div class="section-header">Map Leaders</div>
+                <select id="map-leader-select" style="width:100%;margin-bottom:1rem;background:var(--bg-input);border:1px solid var(--border);color:var(--text-main);padding:0.4rem 0.75rem;border-radius:6px;font-size:0.85rem;outline:none;" onchange="loadMapLeaders()">
+                    <option value="">Select a Map...</option>
+                </select>
+                <div id="map-leaders-list"></div>
+            </div>
+        </div>
+
         <div style="margin-top:1.5rem">
             <div class="card" style="padding:1.25rem">
                 <div class="section-header" style="color:var(--accent-purple)">Archetype Performance</div>
@@ -1614,11 +1634,11 @@
         </div>
         <div class="ban-split">
             <div class="ban-side">
-                <div class="ban-side-header"><h3 class="blue-text">Blue Team Threats</h3></div>
+                <div class="ban-side-header"><h3 class="blue-text">Blue Team Ban</h3></div>
                 <div class="ban-list-scroll" id="ban-list-blue"><div class="loading">Analyzing...</div></div>
             </div>
             <div class="ban-side">
-                <div class="ban-side-header"><h3 class="red-text">Red Team Threats</h3></div>
+                <div class="ban-side-header"><h3 class="red-text">Red Team Ban</h3></div>
                 <div class="ban-list-scroll" id="ban-list-red"><div class="loading">Analyzing...</div></div>
             </div>
         </div>
@@ -1701,7 +1721,10 @@ function switchTab(id) {
     document.getElementById(id).classList.add('active');
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
     if (id === 'stats' && state.connected) loadStatsTable();
-    if (id === 'meta' && state.connected) loadGlobalMeta();
+    if (id === 'meta' && state.connected) {
+        loadGlobalMeta();
+        loadMapMeta();
+    }
 }
 
 // ==========================================
@@ -1947,9 +1970,21 @@ function drawRadar(ctx, dBlue, dRed) {
 }
 
 // ==========================================
-// TEAM SCOUTING
+// TEAM SCOUTING (FIXED)
 // ==========================================
 function populateScoutFilter() {
+    // Populate Tournament
+    const tSel = document.getElementById('scout-tournament-select');
+    tSel.innerHTML = '<option value="All">All Tournaments</option>';
+    (state.filters.tournaments || []).forEach(t => {
+        if (t === 'All') return;
+        const o = document.createElement('option');
+        o.value = t;
+        o.innerText = t;
+        tSel.appendChild(o);
+    });
+
+    // Populate Team
     const sel = document.getElementById('scout-team-select');
     sel.innerHTML = '<option value="">Choose a team...</option>';
     (state.filters.teams || []).forEach(t => {
@@ -1963,6 +1998,7 @@ function populateScoutFilter() {
 
 async function loadTeamSignatures() {
     const name = document.getElementById('scout-team-select').value;
+    const tourn = document.getElementById('scout-tournament-select').value;
     const ph = document.getElementById('scout-placeholder');
     const ct = document.getElementById('scout-content');
     const tt = document.getElementById('scout-team-name');
@@ -1971,21 +2007,35 @@ async function loadTeamSignatures() {
         tt.style.display = 'none';
         ct.style.display = 'none';
         ph.style.display = 'block';
+        ph.innerHTML = 'Select a team to view their signature analysis.';
         return;
     }
 
     tt.style.display = 'block';
-    ct.style.display = 'grid';
-    ph.style.display = 'none';
     tt.innerText = name + ' Analysis';
+    
+    // Reset state while loading
+    ph.style.display = 'none'; 
+    ct.style.display = 'grid';
     document.getElementById('pairings-graph').innerHTML = '<div class="loading">Loading graph...</div>';
     document.getElementById('scout-p1').innerHTML = '';
     document.getElementById('scout-p2').innerHTML = '';
 
     try {
-        const r = await fetch(`${API}/team-signatures/${encodeURIComponent(name)}`);
+        // FIX: Append tournament parameter and handle new structure
+        const r = await fetch(`${API}/team-signatures/${encodeURIComponent(name)}?tournament=${encodeURIComponent(tourn)}`);
         const d = await r.json();
-        renderPairingsGraph(d.pairings);
+
+        // FIX: Handle backend error/status flags
+        if (!d.network || !d.network.found) {
+            ct.style.display = 'none';
+            ph.style.display = 'block';
+            ph.innerHTML = `<div class="error-msg">${esc(d.remark || 'Team data not found.')}</div>`;
+            return;
+        }
+
+        // Use data from nested 'network' object
+        renderPairingsGraph(d.network.pairings);
 
         const renderP = (el, items) => {
             if (!items || !items.length) {
@@ -2004,11 +2054,13 @@ async function loadTeamSignatures() {
                 </div>
             `).join('');
         };
-
-        renderP(document.getElementById('scout-p1'), d.priority_p1);
-        renderP(document.getElementById('scout-p2'), d.priority_p2);
+        renderP(document.getElementById('scout-p1'), d.network.priority_blue_side);
+        renderP(document.getElementById('scout-p2'), d.network.priority_red_side);
     } catch (e) {
-        document.getElementById('pairings-graph').innerHTML = '<div class="error-msg">Failed to load team data.</div>';
+        ct.style.display = 'none';
+        ph.style.display = 'block';
+        ph.innerHTML = '<div class="error-msg">Failed to load team data. Server error.</div>';
+        console.error(e);
     }
 }
 
@@ -2016,6 +2068,7 @@ function renderPairingsGraph(pairings) {
     const ct = document.getElementById('pairings-graph');
     ct.innerHTML = '';
 
+    // FIX: Robust check for empty data
     if (!pairings || !pairings.length) {
         ct.innerHTML = '<div style="color:var(--text-muted);display:flex;align-items:center;justify-content:center;height:100%">No pairings found.</div>';
         return;
@@ -2169,53 +2222,139 @@ function metaRow(h, val, max, fillCls, sub) {
 }
 
 // ==========================================
+// MAP META ANALYSIS
+// ==========================================
+async function loadMapMeta() {
+    try {
+        const r = await fetch(`${API}/map-meta`);
+        if(!r.ok) throw new Error();
+        const data = await r.json();
+
+        const container = document.getElementById('map-adv-list');
+        const select = document.getElementById('map-leader-select');
+
+        // Populate Map Leaders Dropdown
+        select.innerHTML = '<option value="">Select a Map...</option>';
+        data.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.map;
+            opt.innerText = `${m.map} (${m.total_matches})`;
+            select.appendChild(opt);
+        });
+
+        // Render Side Advantage List
+        container.innerHTML = data.map(m => {
+            return `
+            <div class="meta-stat-row">
+                <span class="meta-stat-name" style="min-width:110px">${esc(m.map)}</span>
+                <div style="flex:1;display:flex;align-items:center;gap:8px">
+                    <div style="width:40px;text-align:right;font-size:0.7rem;color:var(--accent-blue);font-weight:700">${m.blue_win_rate}%</div>
+                    <div class="progress-track" style="flex:1;height:10px;display:flex;overflow:hidden;border-radius:4px;background:rgba(0,0,0,0.3)">
+                        <div style="width:${m.blue_win_rate}%;background:var(--accent-blue);height:100%;border-right:1px solid var(--bg-dark)"></div>
+                        <div style="width:${m.red_win_rate}%;background:var(--accent-red);height:100%"></div>
+                    </div>
+                    <div style="width:40px;text-align:left;font-size:0.7rem;color:var(--accent-red);font-weight:700">${m.red_win_rate}%</div>
+                </div>
+                <div style="width:60px;text-align:right;font-size:0.7rem;color:var(--text-muted);margin-left:8px">
+                    ${m.total_matches} Games
+                </div>
+            </div>`;
+        }).join('');
+    } catch(e) {
+        document.getElementById('map-adv-list').innerHTML = '<div class="error-msg">Failed to load map meta.</div>';
+    }
+}
+
+async function loadMapLeaders() {
+    const map = document.getElementById('map-leader-select').value;
+    const list = document.getElementById('map-leaders-list');
+    
+    if(!map) {
+        list.innerHTML = '';
+        return;
+    }
+    
+    list.innerHTML = '<div class="loading">Loading...</div>';
+    
+    try {
+        const r = await fetch(`${API}/map-leaders/${encodeURIComponent(map)}`);
+        if(!r.ok) throw new Error();
+        const d = await r.json();
+        
+        if(!d.leaders || !d.leaders.length) {
+            list.innerHTML = '<div style="color:var(--text-muted);padding:0.5rem;font-size:0.85rem">Not enough data for this map yet.</div>';
+            return;
+        }
+        
+        list.innerHTML = d.leaders.map(h => `
+            <div class="meta-stat-row">
+                ${heroImgTag(h.hero, 'meta-stat-img')}
+                <span class="meta-stat-name">${esc(h.hero)}</span>
+                <div class="progress-track"><div class="progress-fill fill-green" style="width:${h.win_rate}%"></div></div>
+                <div class="meta-stat-vals">
+                    <div class="meta-stat-primary wr-good">${h.win_rate}%</div>
+                    <div class="meta-stat-sub">${h.picks} Picks</div>
+                </div>
+            </div>
+        `).join('');
+    } catch(e) {
+        list.innerHTML = '<div class="error-msg">Error loading leaders.</div>';
+    }
+}
+
+// ==========================================
 // BAN MODAL
 // ==========================================
 async function openBanModal() {
     document.getElementById('ban-modal').style.display = 'flex';
     const bl = document.getElementById('ban-list-blue');
     const rl = document.getElementById('ban-list-red');
-    bl.innerHTML = '<div class="loading">Analyzing...</div>';
-    rl.innerHTML = '<div class="loading">Analyzing...</div>';
+    bl.innerHTML = '<div class="loading">Loading statistics...</div>';
+    rl.innerHTML = '<div class="loading">Loading statistics...</div>';
+
+    // Get current tournament filter from the stats section, or default to All
+    // You can also pass 'All' if you want global stats regardless of filter
+    const tournamentFilter = document.getElementById('stats-tournament')?.value || 'All';
 
     try {
-        const [rB, rR] = await Promise.all([
-            fetch(`${API}/suggest-bans`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ my_team: state.blue, enemy_team: state.red })
-            }),
-            fetch(`${API}/suggest-bans`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ my_team: state.red, enemy_team: state.blue })
-            })
-        ]);
+        // Fetch statistics from backend
+        const r = await fetch(`${API}/suggest-bans?tournament=${encodeURIComponent(tournamentFilter)}`);
+        if(!r.ok) throw new Error();
+        const data = await r.json();
 
-        const render = (el, d) => {
-            if (!d.suggestions || !d.suggestions.length) {
-                el.innerHTML = '<div style="padding:0.75rem;color:var(--text-muted);font-size:0.82rem">No strong threats detected.</div>';
+        // Render Function
+        const renderList = (el, items, sideName) => {
+            if (!items || !items.length) {
+                el.innerHTML = '<div style="padding:0.75rem;color:var(--text-muted);font-size:0.82rem">No ban data available for this side.</div>';
                 return;
             }
-            el.innerHTML = d.suggestions.map(s => `
+
+            el.innerHTML = items.map(s => `
                 <div class="ban-item">
                     <div class="ban-hero-info">
-                        ${heroImgTag(s.name, '', 'width:40px;height:40px;border-radius:6px;object-fit:cover')}
-                        <span class="ban-hero-name">${esc(s.name)}</span>
+                        ${heroImgTag(s.hero, '', 'width:40px;height:40px;border-radius:6px;object-fit:cover')}
+                        <div>
+                            <span class="ban-hero-name">${esc(s.hero)}</span>
+                            <div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;">
+                                ${s.ban_frequency}% Ban Rate &bull; ${s.total_bans} Total
+                            </div>
+                        </div>
                     </div>
-                    <div class="ban-reason">${esc(s.reason)}</div>
+                    <div class="ban-reason">
+                        ${s.ban_win_rate}% Win Rate<br>when banned
+                    </div>
                 </div>
             `).join('');
         };
 
-        render(bl, await rB.json());
-        render(rl, await rR.json());
+        renderList(bl, data.blue, "Blue");
+        renderList(rl, data.red, "Red");
+        
     } catch (e) {
-        bl.innerHTML = '<div class="error-msg">Error</div>';
+        bl.innerHTML = '<div class="error-msg">Error loading ban data.</div>';
         rl.innerHTML = '';
     }
 }
-
 function closeBanModal() {
     document.getElementById('ban-modal').style.display = 'none';
 }
